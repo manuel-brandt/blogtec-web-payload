@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-lato: 'Lato', sans-serif;
+  --brand-red: #E9204F;
+  --brand-yellow: #F9E90A;
+  --brand-cream: #F5EFE8;
+}
+
+body {
+  font-family: var(--font-lato), Lato, sans-serif;
+  color: #1A1A1A;
+}
+
+@layer utilities {
+  .btn-primary {
+    @apply bg-[#E9204F] text-white rounded-pill px-6 py-3 font-bold uppercase tracking-wide text-sm hover:bg-[#d01a44] transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-white text-black border border-black rounded-pill px-6 py-3 font-bold uppercase tracking-wide text-sm hover:bg-gray-50 transition-colors;
+  }
+  .btn-black {
+    @apply bg-black text-white rounded-pill px-6 py-3 font-bold uppercase tracking-wide text-sm hover:bg-gray-900 transition-colors;
+  }
+}
