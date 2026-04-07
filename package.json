@@ -1,28 +1,30 @@
 {
-  "name": "blogtec-web-sanity",
+  "name": "blogtec-web-payload",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:vercel": "payload generate:types && payload migrate && next build",
+    "payload": "payload",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@portabletext/react": "^3.2.1",
-    "@sanity/client": "^6.28.2",
-    "@sanity/document-internationalization": "^6.0.6",
-    "@sanity/image-url": "^1.1.0",
-    "@sanity/language-filter": "^5.0.1",
+    "@payloadcms/db-postgres": "^3.81.0",
+    "@payloadcms/next": "^3.81.0",
+    "@payloadcms/plugin-seo": "^3.81.0",
+    "@payloadcms/richtext-lexical": "^3.81.0",
+    "@payloadcms/storage-vercel-blob": "^3.81.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@vercel/blob": "^2.3.3",
+    "graphql": "^16.13.2",
     "lucide-react": "^0.511.0",
     "next": "^15.0.0",
-    "next-sanity": "^9.8.5",
+    "payload": "^3.81.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-is": "^19.0.0",
-    "sanity": "^3.80.0",
-    "sanity-plugin-internationalized-array": "^5.1.0",
-    "styled-components": "^6.1.0"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -33,6 +35,7 @@
     "eslint-config-next": "^15.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
