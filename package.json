@@ -2,6 +2,7 @@
   "name": "blogtec-web-payload",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -27,6 +28,8 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@swc-node/register": "^1.11.1",
+    "@swc/core": "^1.15.24",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
