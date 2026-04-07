@@ -41,6 +41,7 @@ export default buildConfig({
     }),
     seoPlugin({
       collections: ['blog-posts'],
+      tabbedUI: true,
       generateTitle: ({ doc }) => doc.title as string,
       generateDescription: ({ doc }) => doc.excerpt as string,
     }),

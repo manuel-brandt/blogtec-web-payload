@@ -34,98 +34,108 @@ export const BlogPosts: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      required: true,
-      localized: true,
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      admin: {
-        description: 'Auto-generated from title on first save. Override if needed.',
-      },
-    },
-    {
-      name: 'publishedAt',
-      type: 'date',
-      admin: {
-        date: {
-          pickerAppearance: 'dayAndTime',
-        },
-      },
-    },
-    {
-      name: 'category',
-      type: 'select',
-      options: [
-        { label: 'SEO', value: 'SEO' },
-        { label: 'Content', value: 'Content' },
-        { label: 'Link Building', value: 'Link Building' },
-        { label: 'Google Ads', value: 'Google Ads' },
-        { label: 'Social Media', value: 'Social Media' },
-        { label: 'Allgemein', value: 'Allgemein' },
-      ],
-    },
-    {
-      name: 'excerpt',
-      type: 'textarea',
-      localized: true,
-      maxLength: 200,
-    },
-    {
-      name: 'coverImage',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'coverImageAlt',
-      type: 'text',
-      localized: true,
-    },
-    {
-      name: 'author',
-      type: 'group',
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'avatar',
-          type: 'upload',
-          relationTo: 'media',
-        },
-      ],
-    },
-    {
-      name: 'body',
-      type: 'richText',
-      localized: true,
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          BlockquoteFeature(),
-          UnorderedListFeature(),
-          OrderedListFeature(),
-          BoldFeature(),
-          ItalicFeature(),
-          LinkFeature({}),
-          UploadFeature({
-            collections: {
-              media: {
-                fields: [
-                  { name: 'alt', type: 'text' },
-                  { name: 'caption', type: 'text' },
-                ],
+          label: 'Content',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              localized: true,
+            },
+            {
+              name: 'slug',
+              type: 'text',
+              required: true,
+              unique: true,
+              admin: {
+                description: 'Auto-generated from title on first save. Override if needed.',
               },
             },
-          }),
-        ],
-      }),
+            {
+              name: 'publishedAt',
+              type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+            },
+            {
+              name: 'category',
+              type: 'select',
+              options: [
+                { label: 'SEO', value: 'SEO' },
+                { label: 'Content', value: 'Content' },
+                { label: 'Link Building', value: 'Link Building' },
+                { label: 'Google Ads', value: 'Google Ads' },
+                { label: 'Social Media', value: 'Social Media' },
+                { label: 'Allgemein', value: 'Allgemein' },
+              ],
+            },
+            {
+              name: 'excerpt',
+              type: 'textarea',
+              localized: true,
+              maxLength: 200,
+            },
+            {
+              name: 'coverImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
+              name: 'coverImageAlt',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'author',
+              type: 'group',
+              fields: [
+                {
+                  name: 'name',
+                  type: 'text',
+                },
+                {
+                  name: 'avatar',
+                  type: 'upload',
+                  relationTo: 'media',
+                },
+              ],
+            },
+            {
+              name: 'body',
+              type: 'richText',
+              localized: true,
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+                  BlockquoteFeature(),
+                  UnorderedListFeature(),
+                  OrderedListFeature(),
+                  BoldFeature(),
+                  ItalicFeature(),
+                  LinkFeature({}),
+                  UploadFeature({
+                    collections: {
+                      media: {
+                        fields: [
+                          { name: 'alt', type: 'text' },
+                          { name: 'caption', type: 'text' },
+                        ],
+                      },
+                    },
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
     },
   ],
 }
