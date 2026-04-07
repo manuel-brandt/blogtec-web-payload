@@ -1,6 +1,8 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  // Drop and recreate schema for idempotent initial migration
+  await db.execute(sql`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`)
   await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('de', 'en');
   CREATE TYPE "public"."enum_blog_posts_category" AS ENUM('SEO', 'Content', 'Link Building', 'Google Ads', 'Social Media', 'Allgemein');
