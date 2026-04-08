@@ -1,90 +1,89 @@
-interface ResourceItem {
-  type: string;
-  title: string;
-  href: string;
-}
+import Image from 'next/image'
+import Link from 'next/link'
 
-interface ResourcesData {
-  heading?: string;
-  items?: ResourceItem[];
-}
-
-interface Props {
-  data?: ResourcesData;
-}
-
-const TYPE_COLORS: Record<string, string> = {
-  "Case Study": "bg-orange-100 text-orange-700",
-  Guide: "bg-blue-100 text-blue-700",
-  Video: "bg-red-100 text-red-700",
-  "Blog Artikel": "bg-green-100 text-green-700",
-};
-
-function typeColor(type: string) {
-  return TYPE_COLORS[type] ?? "bg-gray-100 text-gray-700";
-}
-
-const defaultResources: ResourceItem[] = [
+const resources = [
   {
-    type: "Case Study",
-    title: "Top 3 Positionen für lokalen Kammerjäger",
-    href: "/ressourcen/case-study-kammerjaeger",
+    type: 'Case Study',
+    title: 'Top 3 Positions for Local Pest Controller',
+    href: '/case-studies/pest-controller',
+    color: 'bg-orange-100 text-orange-700',
+    image: '/images/resources/pest-controller.jpg',
   },
   {
-    type: "Guide",
-    title: "Wie Agenturen White Label SEO nutzen",
-    href: "/ressourcen/white-label-seo-guide",
+    type: 'Guide',
+    title: 'How to Offer SEO with White Label Services',
+    href: '/guides/white-label-seo',
+    color: 'bg-blue-100 text-blue-700',
+    image: '/images/resources/white-label-guide.jpg',
   },
   {
-    type: "Case Study",
-    title: "+30.000 Besucher für Online Shop",
-    href: "/ressourcen/case-study-online-shop",
+    type: 'Case Study',
+    title: '+30,000 Visitors for Online Shop',
+    href: '/case-studies/online-shop',
+    color: 'bg-orange-100 text-orange-700',
+    image: '/images/resources/online-shop.jpg',
   },
   {
-    type: "Video",
-    title: "Blogtec Vorstellung für Agenturen",
-    href: "/ressourcen/video-agenturen",
+    type: 'Video',
+    title: 'Blogtec Introduction for Agencies',
+    href: '/resources/intro-video',
+    color: 'bg-red-100 text-red-700',
+    image: '/images/resources/intro-video.jpg',
   },
   {
-    type: "Blog Artikel",
-    title: "Guide über GEO und die Zukunft von SEO",
-    href: "/ressourcen/geo-seo-guide",
+    type: 'Blog Article',
+    title: 'Guide on GEO & The Future of SEO',
+    href: '/blog/geo-future-of-seo',
+    color: 'bg-green-100 text-green-700',
+    image: '/images/resources/geo-guide.jpg',
   },
-];
+]
 
-export default function ResourcesSection({ data }: Props) {
-  const heading = data?.heading ?? "Entdecke unsere Ressourcen";
-  const resources = data?.items && data.items.length > 0 ? data.items : defaultResources;
-
+export default function ResourcesSection() {
   return (
     <section className="bg-white py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl lg:text-4xl font-black text-black text-center mb-12">
-          {heading}
+        <h2 className="text-3xl lg:text-4xl font-black text-black text-center mb-4">
+          Discover Our Resources
         </h2>
+        <p className="text-gray-500 text-center mb-12">
+          Guides, case studies, and insights to help you grow
+        </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-          {resources.map((resource) => (
-            <a
-              key={resource.title}
-              href={resource.href}
-              className="group bg-gray-50 border border-gray-200 rounded-2xl p-5 hover:shadow-md hover:border-[#E9204F] transition-all"
+          {resources.map((r) => (
+            <Link
+              key={r.title}
+              href={r.href}
+              className="group bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E9204F] transition-all flex flex-col"
             >
-              <span
-                className={`inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3 ${typeColor(resource.type)}`}
-              >
-                {resource.type}
-              </span>
-              <h3 className="font-bold text-gray-800 text-sm leading-snug mb-3 group-hover:text-[#E9204F] transition-colors">
-                {resource.title}
-              </h3>
-              <span className="text-[#E9204F] text-sm font-medium">
-                Mehr erfahren ➜
-              </span>
-            </a>
+              {/* Thumbnail */}
+              <div className="relative w-full aspect-video overflow-hidden">
+                <Image
+                  src={r.image}
+                  alt={r.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                />
+              </div>
+
+              {/* Content */}
+              <div className="p-5 flex flex-col gap-3 flex-1">
+                <span className={`inline-block text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full w-fit ${r.color}`}>
+                  {r.type}
+                </span>
+                <h3 className="font-bold text-gray-800 text-sm leading-snug group-hover:text-[#E9204F] transition-colors">
+                  {r.title}
+                </h3>
+                <span className="text-[#E9204F] text-sm font-medium mt-auto">
+                  Learn More ➜
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }

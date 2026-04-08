@@ -1,41 +1,30 @@
-import Link from "next/link";
+'use client'
 
-interface AnnouncementBarData {
-  text?: string;
-  ctaText?: string;
-  ctaLink?: string;
-  enabled?: boolean;
-}
+import { useState } from 'react'
+import Link from 'next/link'
 
-interface Props {
-  data?: AnnouncementBarData;
-}
+export default function AnnouncementBar() {
+  const [dismissed, setDismissed] = useState(false)
 
-const defaults: Required<AnnouncementBarData> = {
-  text: "Kaufe Backlinks günstiger denn je mit unserem Link Center",
-  ctaText: "MEHR ERFAHREN",
-  ctaLink: "#link-center",
-  enabled: true,
-};
-
-export default function AnnouncementBar({ data }: Props) {
-  const text = data?.text ?? defaults.text;
-  const ctaText = data?.ctaText ?? defaults.ctaText;
-  const ctaLink = data?.ctaLink ?? defaults.ctaLink;
-  const enabled = data?.enabled ?? defaults.enabled;
-
-  if (!enabled) return null;
+  if (dismissed) return null
 
   return (
-    <div className="bg-[#1A1A1A] text-white text-center py-3 px-4 flex items-center justify-center gap-3 text-sm">
+    <div className="bg-[#1A1A1A] text-white text-center py-3 px-4 flex items-center justify-center gap-3 text-sm relative">
       <span className="text-[#F9E90A]">🔗</span>
-      <span>{text}</span>
+      <span>Buy backlinks cheaper than ever with our Link Center</span>
       <Link
-        href={ctaLink}
+        href="/link-center"
         className="bg-[#F9E90A] text-black font-bold px-4 py-1.5 rounded-pill text-xs uppercase tracking-wide hover:bg-yellow-300 transition-colors whitespace-nowrap"
       >
-        {ctaText}
+        LEARN MORE
       </Link>
+      <button
+        onClick={() => setDismissed(true)}
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-lg leading-none"
+        aria-label="Dismiss"
+      >
+        ×
+      </button>
     </div>
-  );
+  )
 }

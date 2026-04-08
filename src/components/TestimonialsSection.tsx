@@ -1,159 +1,134 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 
-interface Testimonial {
-  name: string;
-  role: string;
-  company: string;
-  text: string;
-  initials?: string;
-  color?: string;
+const testimonials = [
+  {
+    name: 'Marcel Speckmann',
+    role: 'Agency Owner',
+    company: 'Speckmann Webdesign',
+    initials: 'MS',
+    color: 'bg-orange-500',
+    text: "I am very satisfied with Blogtec because they have a very high service standard. The content is very well written, and my clients achieve strong rankings. I can only recommend Blogtec to any agency considering outsourcing SEO and look forward to many more years together.",
+  },
+  {
+    name: 'Sara Nikoletti',
+    role: 'SEO Manager',
+    company: 'BioTechUSA',
+    initials: 'SN',
+    color: 'bg-pink-500',
+    text: "We have been working with Blogtec for years on SEO content creation and link building. They always send high quality articles even though we have specific topics to write about. They are always on time and very flexible. I'm very happy to found them and really grateful for their work.",
+  },
+  {
+    name: 'Nico Winter',
+    role: 'Agency Owner',
+    company: 'Webmarketiere',
+    initials: 'NW',
+    color: 'bg-indigo-500',
+    text: "I had the pleasure of working with Blogtec on several projects, and from the very beginning, I was thoroughly impressed. Their reliability and the high quality of their results have consistently convinced me of their excellence. The entire process is exceptionally well-structured, ensuring everything runs smoothly and efficiently.",
+  },
+  {
+    name: 'Joachim Mahr',
+    role: 'Agency Owner',
+    company: 'Jomox Media',
+    initials: 'JM',
+    color: 'bg-green-500',
+    text: "I was treated warmly and professionally right from the start. The quality of the work is outstanding and far exceeded my expectations. I was particularly impressed by the attention to detail and the friendly nature of the team. If you are looking for excellent service in a pleasant atmosphere, this is the place for you!",
+  },
+  {
+    name: 'Marcus Rothermel',
+    role: 'Agency Owner',
+    company: 'Kivi Studio',
+    initials: 'MR',
+    color: 'bg-blue-500',
+    text: "I highly recommend the service and quality to anyone. We work with different industries and target groups, and the writers always quickly understand how to put themselves in the readers' position. This is also reflected in the organic visibility results of our projects.",
+  },
+  {
+    name: 'Cynthia Pucheanu',
+    role: 'Marketing Manager',
+    company: 'Trimble',
+    initials: 'CP',
+    color: 'bg-purple-500',
+    text: "The price-to-quality ratio is great, making their services a great investment. They deliver content and links that are truly geared towards improving organic performance, so always keeping our KPIs top of mind.",
+  },
+  {
+    name: 'Marco Meneghin',
+    role: 'Agency Owner',
+    company: 'OMGroup',
+    initials: 'MM',
+    color: 'bg-teal-500',
+    text: "We have been working with Blogtec for some time now and are truly impressed! The team's response time is incredibly fast, and collaborating with them is a real pleasure. We're especially impressed by how precisely they stick to agreed deadlines – absolutely reliable and professional.",
+  },
+]
+
+function StarRating() {
+  return (
+    <div className="flex gap-1">
+      {[...Array(5)].map((_, i) => (
+        <span key={i} className="text-[#F9E90A] text-sm">★</span>
+      ))}
+    </div>
+  )
 }
 
-interface Props {
-  data?: Testimonial[];
-}
-
-const COLORS = [
-  "bg-blue-500",
-  "bg-purple-500",
-  "bg-green-500",
-  "bg-orange-500",
-  "bg-pink-500",
-  "bg-indigo-500",
-];
-
-const defaultTestimonials: Testimonial[] = [
-  {
-    name: "Marcus Rothermel",
-    role: "Agenturinhaber",
-    company: "Kivi Studio",
-    initials: "MR",
-    color: "bg-blue-500",
-    text: "Ich kann den Service und die Qualität nur jedem empfehlen. Wir haben oft mit verschiedenen Branchen und Zielgruppen zu tun und die Redakteure verstehen immer sofort sich in die Leser hineinzuversetzen. Das spiegelt sich auch in der organischen Sichtbarkeit in unseren Projekten wieder.",
-  },
-  {
-    name: "Cynthia Pucheanu",
-    role: "Marketing Manager",
-    company: "Trimble",
-    initials: "CP",
-    color: "bg-purple-500",
-    text: "Das Preis-Leistungs-Verhältnis ist hervorragend und macht ihre Leistungen zu einer sehr guten Investition. Sie liefern Text und Links, die gezielt auf die Verbesserung der organischen Performance ausgerichtet sind und behalten dabei stets unsere KPIs im Blick.",
-  },
-  {
-    name: "Joachim Mahr",
-    role: "Agenturinhaber",
-    company: "Jomox Media",
-    initials: "JM",
-    color: "bg-green-500",
-    text: "Von Anfang an wurde ich herzlich und professionell behandelt. Die Qualität der Arbeit ist herausragend und übertraf meine Erwartungen bei weitem. Besonders beeindruckt hat mich die Liebe zum Detail und die freundliche Art des Teams.",
-  },
-  {
-    name: "Marcel Speckmann",
-    role: "Agenturinhaber",
-    company: "Speckmann Webdesign",
-    initials: "MS",
-    color: "bg-orange-500",
-    text: "Ich bin sehr zufrieden mit Blogtec, weil Blogtec einen sehr hohen Serviceanspruch hat, die Texte sehr gut geschrieben sind und meine Kunden gute Rankings aufbauen. Ich kann jeder Agentur, die überlegt SEO auszulagern, Blogtec nur empfehlen.",
-  },
-  {
-    name: "Sara Nikoletti",
-    role: "SEO Manager",
-    company: "BioTechUSA",
-    initials: "SN",
-    color: "bg-pink-500",
-    text: "Wir arbeiten seit Jahren mit Blogtec zusammen, um SEO-Texte zu erstellen und Backlinks aufzubauen. Sie schicken uns immer qualitativ hochwertige Texte, sind immer pünktlich und sehr flexibel. Ich bin sehr froh, dass ich sie gefunden habe.",
-  },
-  {
-    name: "Nico Winter",
-    role: "Agenturinhaber",
-    company: "Webmarketiere",
-    initials: "NW",
-    color: "bg-indigo-500",
-    text: "Ich hatte und habe weiterhin das große Vergnügen, mit Blogtec an mehreren bedeutenden Projekten zusammenzuarbeiten, und war von Anfang an tief beeindruckt. Ihre außerordentliche Zuverlässigkeit und die herausragende Qualität ihrer Ergebnisse haben mich vollständig überzeugt.",
-  },
-];
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-export default function TestimonialsSection({ data }: Props) {
-  const testimonials = data && data.length > 0 ? data : defaultTestimonials;
-  const [startIndex, setStartIndex] = useState(0);
-  const visible = 3;
-
-  const handlePrev = () => setStartIndex((prev) => Math.max(0, prev - 1));
-  const handleNext = () =>
-    setStartIndex((prev) => Math.min(testimonials.length - visible, prev + 1));
-
-  const visibleTestimonials = testimonials.slice(startIndex, startIndex + visible);
+export default function TestimonialsSection() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const active = testimonials[activeIndex]
 
   return (
     <section className="bg-[#F5EFE8] py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl lg:text-4xl font-black text-black text-center mb-12">
-          Was andere Kunden sagen
+        <h2 className="text-3xl lg:text-4xl font-black text-black text-center mb-4">
+          What Other Customers Say
         </h2>
+        <p className="text-gray-500 text-center mb-12">
+          Join 300+ agencies and teams who trust Blogtec
+        </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visibleTestimonials.map((t, idx) => {
-            const initials = t.initials ?? getInitials(t.name);
-            const color = t.color ?? COLORS[idx % COLORS.length];
-            return (
-              <div
-                key={t.name}
-                className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-4"
-              >
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-[#F9E90A] text-sm">★</span>
-                  ))}
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed flex-1">
-                  &ldquo;{t.text}&rdquo;
-                </p>
-                <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-                  <div
-                    className={`w-10 h-10 rounded-full ${color} text-white flex items-center justify-center font-bold text-sm flex-shrink-0`}
-                  >
-                    {initials}
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-black">{t.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {t.role} – {t.company}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        {/* Featured testimonial */}
+        <div className="bg-white rounded-3xl p-8 mb-8 max-w-3xl mx-auto shadow-sm">
+          <StarRating />
+          <blockquote className="text-gray-700 text-lg leading-relaxed my-4 italic">
+            &ldquo;{active.text}&rdquo;
+          </blockquote>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full ${active.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+              {active.initials}
+            </div>
+            <div>
+              <p className="font-bold text-black">{active.name}</p>
+              <p className="text-sm text-gray-500">{active.role} – {active.company}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-center gap-3 mt-8">
-          <button
-            onClick={handlePrev}
-            disabled={startIndex === 0}
-            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-black hover:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            ←
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={startIndex >= testimonials.length - visible}
-            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-black hover:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            →
-          </button>
+        {/* Testimonial grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {testimonials.map((t, i) => (
+            <button
+              key={t.name}
+              onClick={() => setActiveIndex(i)}
+              className={`text-left bg-white rounded-2xl p-6 shadow-sm transition-all hover:shadow-md ${
+                i === activeIndex ? 'ring-2 ring-[#E9204F]' : ''
+              }`}
+            >
+              <StarRating />
+              <p className="text-gray-600 text-sm mt-3 mb-4 line-clamp-3 italic">
+                &ldquo;{t.text}&rdquo;
+              </p>
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                <div className={`w-8 h-8 rounded-full ${t.color} flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0`}>
+                  {t.initials}
+                </div>
+                <div>
+                  <p className="font-semibold text-black text-sm">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.company}</p>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </section>
-  );
+  )
 }
