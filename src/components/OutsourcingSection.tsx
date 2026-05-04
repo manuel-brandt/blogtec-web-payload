@@ -13,33 +13,96 @@ function CheckItem({ text }: { text: string }) {
   )
 }
 
-const featureGroups = [
-  {
-    title: 'Reliable Service & Quality',
-    items: [
-      'Get a Dedicated Contact Person',
-      'Services Can Be Adapted to Your Needs',
-      'Constant Quality in Various Niches & Languages',
+const ui = {
+  en: {
+    heading: 'Outsourcing Has Never Been Easier',
+    subheading: 'Get backlinks, content, or other services done — without having to grow your team.',
+    signUp: 'SIGN UP FREE',
+    signUpHref: 'https://app.blogtec.io/register/',
+    featureGroups: [
+      {
+        title: 'Reliable Service & Quality',
+        items: [
+          'Get a Dedicated Contact Person',
+          'Services Can Be Adapted to Your Needs',
+          'Constant Quality in Various Niches & Languages',
+        ],
+      },
+      {
+        title: 'No Contracts or Minimums',
+        items: [
+          'Monthly Packages from €250/Month',
+          'Flexible Single Services',
+          'Cancel Any Time',
+        ],
+      },
+      {
+        title: 'Optimized for Agencies',
+        items: [
+          'Request FREE Strategies for Clients',
+          'Get Everything White Label',
+        ],
+      },
     ],
-  },
-  {
-    title: 'No Contracts or Minimums',
-    items: [
-      'Monthly Packages from €250/Month',
-      'Flexible Single Services',
-      'Cancel Any Time',
+    wlHeading: 'Reliable Outsourcing with a White Label Partner',
+    wlBody: 'Add more services to your portfolio or become more flexible and focused if you already offer them.',
+    wlItems: [
+      'Get a reliable partner while staying flexible.',
+      'Everything right in your branding.',
+      'Unlimited free SEO strategies for your clients.',
     ],
+    wlCta: 'LEARN MORE',
+    wlCtaHref: '/white-label',
+    testimonialQuote: 'I have had the pleasure of working with Blogtec on several projects, and from the very beginning, I was thoroughly impressed. Their reliability and the high quality of their results have consistently convinced me of their excellence. The entire process is exceptionally well-structured, ensuring everything runs smoothly and efficiently.',
+    testimonialRole: 'Agency Owner, Webmarketiere',
   },
-  {
-    title: 'Optimized for Agencies',
-    items: [
-      'Request FREE Strategies for Clients',
-      'Get Everything White Label',
+  de: {
+    heading: 'Outsourcing war noch nie so einfach',
+    subheading: 'Lass Backlinks, Content und andere Leistungen erledigen – ohne dein Team vergrößern zu müssen.',
+    signUp: 'KOSTENLOS REGISTRIEREN',
+    signUpHref: 'https://app.blogtec.io/register/',
+    featureGroups: [
+      {
+        title: 'Zuverlässiger Service & Qualität',
+        items: [
+          'Dein persönlicher Ansprechpartner',
+          'Leistungen individuell anpassbar',
+          'Gleichbleibende Qualität in verschiedenen Nischen & Sprachen',
+        ],
+      },
+      {
+        title: 'Keine Verträge oder Mindestbestellwerte',
+        items: [
+          'Monatliche Pakete ab 250 €/Monat',
+          'Flexible Einzelleistungen',
+          'Jederzeit kündbar',
+        ],
+      },
+      {
+        title: 'Optimiert für Agenturen',
+        items: [
+          'Kostenlose Strategien für Kunden anfordern',
+          'Alles als White Label verfügbar',
+        ],
+      },
     ],
+    wlHeading: 'Zuverlässiges Outsourcing mit einem White-Label-Partner',
+    wlBody: 'Erweitere dein Portfolio oder werde flexibler und fokussierter, wenn du bereits entsprechende Leistungen anbietest.',
+    wlItems: [
+      'Ein zuverlässiger Partner – mit maximaler Flexibilität.',
+      'Alles in deinem Branding.',
+      'Unbegrenzte kostenlose SEO-Strategien für deine Kunden.',
+    ],
+    wlCta: 'MEHR ERFAHREN',
+    wlCtaHref: '/de/white-label',
+    testimonialQuote: 'Ich hatte das Vergnügen, mit Blogtec an mehreren Projekten zusammenzuarbeiten, und war von Anfang an sehr beeindruckt. Die Zuverlässigkeit und die hohe Qualität der Ergebnisse haben mich stets überzeugt. Der gesamte Prozess ist hervorragend strukturiert und läuft reibungslos und effizient.',
+    testimonialRole: 'Agenturinhaber, Webmarketiere',
   },
-]
+}
 
-export default function OutsourcingSection() {
+export default function OutsourcingSection({ locale = 'en' }: { locale?: 'en' | 'de' }) {
+  const t = ui[locale]
+
   return (
     <section className="bg-white py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4">
@@ -47,19 +110,19 @@ export default function OutsourcingSection() {
           {/* Left: outsourcing benefits */}
           <div>
             <h2 className="text-3xl lg:text-4xl font-black text-black mb-4">
-              Outsourcing Has Never Been Easier
+              {t.heading}
             </h2>
             <p className="text-gray-500 mb-8">
-              Get backlinks, content, or other services done — without having to grow your team.
+              {t.subheading}
             </p>
             <Link
-              href="https://app.blogtec.io/register/"
+              href={t.signUpHref}
               className="inline-block bg-[#E9204F] text-white rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-[#d01a44] transition-colors mb-10"
             >
-              SIGN UP FREE
+              {t.signUp}
             </Link>
             <div className="space-y-4">
-              {featureGroups.map((group) => (
+              {t.featureGroups.map((group) => (
                 <div key={group.title} className="bg-[#F5EFE8] rounded-2xl p-5">
                   <h3 className="font-black text-black text-base mb-3">{group.title}</h3>
                   <ul className="space-y-2">
@@ -78,27 +141,22 @@ export default function OutsourcingSection() {
               🏷️ White Label
             </span>
             <h2 className="text-3xl lg:text-4xl font-black text-black mb-6">
-              Reliable Outsourcing with a White Label Partner
+              {t.wlHeading}
             </h2>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Add more services to your portfolio or become more flexible and focused if you
-              already offer them.
+              {t.wlBody}
             </p>
             <ul className="space-y-3 mb-8">
-              {[
-                'Get a reliable partner while staying flexible.',
-                'Everything right in your branding.',
-                'Unlimited free SEO strategies for your clients.',
-              ].map((item) => (
+              {t.wlItems.map((item) => (
                 <CheckItem key={item} text={item} />
               ))}
             </ul>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/white-label"
+                href={t.wlCtaHref}
                 className="inline-block border border-black text-black rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-gray-50 transition-colors"
               >
-                LEARN MORE
+                {t.wlCta}
               </Link>
             </div>
 
@@ -112,11 +170,7 @@ export default function OutsourcingSection() {
                 ))}
               </div>
               <blockquote className="text-gray-700 leading-relaxed mb-5 italic text-sm">
-                &ldquo;I have had the pleasure of working with Blogtec on several projects, and from
-                the very beginning, I was thoroughly impressed. Their reliability and the high quality
-                of their results have consistently convinced me of their excellence. The entire
-                process is exceptionally well-structured, ensuring everything runs smoothly and
-                efficiently.&rdquo;
+                &ldquo;{t.testimonialQuote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -124,7 +178,7 @@ export default function OutsourcingSection() {
                 </div>
                 <div>
                   <p className="font-bold text-black text-sm">Nico Winter</p>
-                  <p className="text-xs text-gray-500">Agency Owner, Webmarketiere</p>
+                  <p className="text-xs text-gray-500">{t.testimonialRole}</p>
                 </div>
               </div>
             </div>

@@ -1,35 +1,59 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function HeroSection() {
+const ui = {
+  en: {
+    badge: '✦ New: Design & Development',
+    heading1: 'Marketing Services,',
+    heading2: 'Easily Outsourced.',
+    subheading: 'SEO, Google Ads, Design & Development services with excellent flexibility and reliability.',
+    signUp: 'SIGN UP FREE',
+    consultation: 'BOOK CONSULTATION',
+    signUpHref: 'https://app.blogtec.io/register/',
+    consultationHref: '/consultation',
+  },
+  de: {
+    badge: '✦ Neu: Design & Entwicklung',
+    heading1: 'Marketing-Leistungen,',
+    heading2: 'einfach ausgelagert.',
+    subheading: 'SEO, Google Ads, Design & Entwicklung – mit hervorragender Flexibilität und Zuverlässigkeit.',
+    signUp: 'KOSTENLOS REGISTRIEREN',
+    consultation: 'BERATUNG BUCHEN',
+    signUpHref: 'https://app.blogtec.io/register/',
+    consultationHref: '/de/consultation',
+  },
+}
+
+export default function HeroSection({ locale = 'en' }: { locale?: 'en' | 'de' }) {
+  const t = ui[locale]
+
   return (
     <section className="bg-[#F5EFE8] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
         {/* Left: copy */}
         <div className="space-y-6">
           <span className="inline-block bg-white text-[#E9204F] text-xs font-bold px-3 py-1.5 rounded-pill border border-red-100 shadow-sm">
-            ✦ New: Design &amp; Development
+            {t.badge}
           </span>
           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black text-black leading-[1.08] tracking-tight">
-            Marketing Services,{' '}
-            <span className="block">Easily Outsourced.</span>
+            {t.heading1}{' '}
+            <span className="block">{t.heading2}</span>
           </h1>
           <p className="text-lg text-gray-700 max-w-md leading-relaxed">
-            SEO, Google Ads, Design &amp; Development services with excellent flexibility and
-            reliability.
+            {t.subheading}
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
-              href="https://app.blogtec.io/register/"
+              href={t.signUpHref}
               className="bg-[#E9204F] text-white rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-[#d01a44] transition-colors shadow-lg"
             >
-              SIGN UP FREE
+              {t.signUp}
             </Link>
             <Link
-              href="/consultation"
+              href={t.consultationHref}
               className="border border-black text-black rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-white/50 transition-colors"
             >
-              BOOK CONSULTATION
+              {t.consultation}
             </Link>
           </div>
         </div>

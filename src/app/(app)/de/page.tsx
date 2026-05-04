@@ -57,17 +57,17 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function HomeDe() {
   return (
     <main>
-      <AnnouncementBar />
+      <AnnouncementBar locale="de" />
       <Navbar />
-      <HeroSection />
-      <LogoBar />
-      <StatsBar />
-      <ServicesSection />
-      <LinkCenterSection />
-      <OutsourcingSection />
-      <CtaSection />
-      <TestimonialsSection />
-      <ResourcesSection />
+      <HeroSection locale="de" />
+      <LogoBar locale="de" />
+      <StatsBar locale="de" />
+      <ServicesSection locale="de" />
+      <LinkCenterSection locale="de" />
+      <OutsourcingSection locale="de" />
+      <CtaSection locale="de" />
+      <TestimonialsSection locale="de" />
+      <ResourcesSection locale="de" />
       <Footer />
     </main>
   );

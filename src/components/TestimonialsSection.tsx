@@ -6,6 +6,7 @@ const testimonials = [
   {
     name: 'Marcel Speckmann',
     role: 'Agency Owner',
+    roleDe: 'Agenturinhaber',
     company: 'Speckmann Webdesign',
     initials: 'MS',
     color: 'bg-orange-500',
@@ -14,6 +15,7 @@ const testimonials = [
   {
     name: 'Sara Nikoletti',
     role: 'SEO Manager',
+    roleDe: 'SEO Managerin',
     company: 'BioTechUSA',
     initials: 'SN',
     color: 'bg-pink-500',
@@ -22,6 +24,7 @@ const testimonials = [
   {
     name: 'Nico Winter',
     role: 'Agency Owner',
+    roleDe: 'Agenturinhaber',
     company: 'Webmarketiere',
     initials: 'NW',
     color: 'bg-indigo-500',
@@ -30,6 +33,7 @@ const testimonials = [
   {
     name: 'Joachim Mahr',
     role: 'Agency Owner',
+    roleDe: 'Agenturinhaber',
     company: 'Jomox Media',
     initials: 'JM',
     color: 'bg-green-500',
@@ -38,6 +42,7 @@ const testimonials = [
   {
     name: 'Marcus Rothermel',
     role: 'Agency Owner',
+    roleDe: 'Agenturinhaber',
     company: 'Kivi Studio',
     initials: 'MR',
     color: 'bg-blue-500',
@@ -46,6 +51,7 @@ const testimonials = [
   {
     name: 'Cynthia Pucheanu',
     role: 'Marketing Manager',
+    roleDe: 'Marketing Managerin',
     company: 'Trimble',
     initials: 'CP',
     color: 'bg-purple-500',
@@ -54,12 +60,24 @@ const testimonials = [
   {
     name: 'Marco Meneghin',
     role: 'Agency Owner',
+    roleDe: 'Agenturinhaber',
     company: 'OMGroup',
     initials: 'MM',
     color: 'bg-teal-500',
     text: "We have been working with Blogtec for some time now and are truly impressed! The team's response time is incredibly fast, and collaborating with them is a real pleasure. We're especially impressed by how precisely they stick to agreed deadlines – absolutely reliable and professional.",
   },
 ]
+
+const ui = {
+  en: {
+    heading: 'What Other Customers Say',
+    subheading: 'Join 300+ agencies and teams who trust Blogtec',
+  },
+  de: {
+    heading: 'Was andere Kunden sagen',
+    subheading: 'Schließe dich 300+ Agenturen und Teams an, die Blogtec vertrauen',
+  },
+}
 
 function StarRating() {
   return (
@@ -71,18 +89,19 @@ function StarRating() {
   )
 }
 
-export default function TestimonialsSection() {
+export default function TestimonialsSection({ locale = 'en' }: { locale?: 'en' | 'de' }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const active = testimonials[activeIndex]
+  const t = ui[locale]
 
   return (
     <section className="bg-[#F5EFE8] py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-3xl lg:text-4xl font-black text-black text-center mb-4">
-          What Other Customers Say
+          {t.heading}
         </h2>
         <p className="text-gray-500 text-center mb-12">
-          Join 300+ agencies and teams who trust Blogtec
+          {t.subheading}
         </p>
 
         {/* Featured testimonial */}
@@ -97,7 +116,7 @@ export default function TestimonialsSection() {
             </div>
             <div>
               <p className="font-bold text-black">{active.name}</p>
-              <p className="text-sm text-gray-500">{active.role} – {active.company}</p>
+              <p className="text-sm text-gray-500">{locale === 'de' ? active.roleDe : active.role} – {active.company}</p>
             </div>
           </div>
         </div>
