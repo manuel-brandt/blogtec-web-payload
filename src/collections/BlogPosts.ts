@@ -87,11 +87,6 @@ export const BlogPosts: CollectionConfig = {
               relationTo: 'media',
             },
             {
-              name: 'coverImageAlt',
-              type: 'text',
-              localized: true,
-            },
-            {
               name: 'author',
               type: 'group',
               fields: [
