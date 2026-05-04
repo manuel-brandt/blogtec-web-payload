@@ -18,14 +18,21 @@ export async function generateMetadata({
   const lang = locale === 'en' ? 'en' : 'de'
   try {
     const payload = await getPayload({ config })
-    const { docs } = await payload.find({
-      collection: 'pages',
-      where: { slug: { equals: 'blog' } },
-      locale: lang as 'de' | 'en',
-      depth: 0,
-      limit: 1,
-    })
-    const page = docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined
+    const otherLang = lang === 'de' ? 'en' : 'de'
+    const findPage = async (locale: 'de' | 'en') => {
+      const { docs } = await payload.find({
+        collection: 'pages',
+        where: { slug: { equals: 'blog' } },
+        locale,
+        depth: 0,
+        limit: 1,
+      })
+      return docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined
+    }
+    let page = await findPage(lang as 'de' | 'en')
+    if (!page?.meta?.title && !page?.meta?.description) {
+      page = await findPage(otherLang)
+    }
     if (page?.meta?.title || page?.meta?.description) {
       return {
         title: page.meta?.title ?? undefined,

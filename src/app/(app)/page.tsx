@@ -17,13 +17,21 @@ import type { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config });
-    const { docs } = await payload.find({
-      collection: "pages",
-      where: { slug: { equals: "home" } },
-      depth: 0,
-      limit: 1,
-    });
-    const page = docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined;
+    // Try German first (default locale), then English — picks up whichever locale the editor saved in
+    const findPage = async (locale: 'de' | 'en') => {
+      const { docs } = await payload.find({
+        collection: 'pages',
+        where: { slug: { equals: 'home' } },
+        locale,
+        depth: 0,
+        limit: 1,
+      });
+      return docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined;
+    };
+    let page = await findPage('de');
+    if (!page?.meta?.title && !page?.meta?.description) {
+      page = await findPage('en');
+    }
     if (page?.meta?.title || page?.meta?.description) {
       const title = page.meta?.title ?? "Blogtec";
       const description = page.meta?.description ?? undefined;
