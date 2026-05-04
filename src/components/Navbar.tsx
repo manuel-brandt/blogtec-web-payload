@@ -34,13 +34,14 @@ export default function Navbar() {
         scrolled ? 'bg-white shadow-sm' : 'bg-[#F5EFE8]'
       }`}
     >
-      {/* Top bar — collapses on scroll */}
+      {/* Top bar — collapses on scroll. overflow-visible when expanded so the
+          language-switcher dropdown isn't clipped by the collapse container. */}
       <div
-        className={`bg-[#EADCC4] overflow-hidden transition-[max-height,opacity] duration-200 ${
-          scrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100'
+        className={`bg-[#EADCC4] transition-[max-height,opacity] duration-200 ${
+          scrolled ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-12 opacity-100 overflow-visible'
         }`}
       >
-        <div className="px-4 py-2 flex justify-between items-center gap-4 text-sm max-w-7xl mx-auto">
+        <div className="px-4 py-2 flex justify-end items-center gap-5 text-sm max-w-7xl mx-auto">
           <Link
             href="https://app.blogtec.io"
             className="flex items-center gap-1 text-gray-700 hover:text-black transition-colors"
