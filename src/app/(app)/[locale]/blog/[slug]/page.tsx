@@ -111,6 +111,7 @@ export default async function BlogPostPage({
 }) {
   const { locale, slug } = await params
   const lang = locale === 'en' ? 'en' : 'de'
+  const blogUrl = lang === 'de' ? '/de/blog' : '/blog'
   const t = ui[lang as keyof typeof ui]
 
   const payload = await getPayload({ config })
@@ -140,7 +141,7 @@ export default async function BlogPostPage({
         <section className="bg-gray-50 border-b border-gray-200 py-12 px-4">
           <div className="max-w-3xl mx-auto">
             <Link
-              href={`/${lang}/blog`}
+              href={blogUrl}
               className="text-sm text-blue-600 hover:underline mb-6 inline-block"
             >
               {t.back}
@@ -204,7 +205,7 @@ export default async function BlogPostPage({
 
         {/* Back link */}
         <div className="max-w-3xl mx-auto px-4 pb-16">
-          <Link href={`/${lang}/blog`} className="text-sm text-blue-600 hover:underline">
+          <Link href={blogUrl} className="text-sm text-blue-600 hover:underline">
             {t.backAll}
           </Link>
         </div>

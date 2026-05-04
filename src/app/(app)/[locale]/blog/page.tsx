@@ -87,6 +87,7 @@ const ui = {
 export default async function BlogPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const lang = locale === 'en' ? 'en' : 'de'
+  const postUrl = (slug: string) => lang === 'de' ? `/de/blog/${slug}` : `/blog/${slug}`
   const t = ui[lang as keyof typeof ui]
 
   const payload = await getPayload({ config })
@@ -131,7 +132,7 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                 return (
                   <Link
                     key={post.slug}
-                    href={`/${lang}/blog/${post.slug}`}
+                    href={postUrl(post.slug)}
                     className="group flex flex-col bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-200"
                   >
                     {/* Cover image */}

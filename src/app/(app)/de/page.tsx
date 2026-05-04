@@ -17,11 +17,10 @@ import type { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config });
-    // Try German first (default locale), then English — picks up whichever locale the editor saved in
     const findPage = async (locale: 'de' | 'en') => {
       const { docs } = await payload.find({
-        collection: 'pages',
-        where: { slug: { equals: 'home' } },
+        collection: "pages",
+        where: { slug: { equals: "home" } },
         locale,
         depth: 0,
         limit: 1,
@@ -38,23 +37,20 @@ export async function generateMetadata(): Promise<Metadata> {
       return {
         title: { absolute: title },
         description,
-        alternates: { canonical: '/', languages: { 'en': '/', 'de': '/de' } },
-        openGraph: { title, description, url: "https://blogtec.io" },
+        alternates: { canonical: '/de', languages: { 'de': '/de', 'en': '/' } },
+        openGraph: { title, description, url: "https://blogtec.io/de" },
       };
     }
   } catch {}
-  const fallbackTitle = "Blogtec – Marketing Leistungen, einfach ausgelagert.";
-  const fallbackDesc =
-    "SEO, Google-Ads, Design und Entwicklung mit hervorragender Flexibilität und Zuverlässigkeit. Outsorce your marketing with Blogtec.";
   return {
-    title: { absolute: fallbackTitle },
-    description: fallbackDesc,
-    alternates: { canonical: '/', languages: { 'en': '/', 'de': '/de' } },
-    openGraph: { title: fallbackTitle, description: fallbackDesc, url: "https://blogtec.io" },
+    title: { absolute: "Blogtec – Marketing Leistungen, einfach ausgelagert." },
+    description: "SEO, Google-Ads, Design und Entwicklung mit hervorragender Flexibilität und Zuverlässigkeit.",
+    alternates: { canonical: '/de', languages: { 'de': '/de', 'en': '/' } },
+    openGraph: { url: "https://blogtec.io/de" },
   };
 }
 
-export default function Home() {
+export default function HomeDe() {
   return (
     <main>
       <AnnouncementBar />

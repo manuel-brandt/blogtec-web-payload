@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { BlogtecLogo } from './BlogtecLogo'
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 const navLinks = [
   { label: 'Services', href: '/services', hasDropdown: true },
@@ -18,7 +20,8 @@ export default function Navbar() {
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
       {/* Top bar */}
-      <div className="border-b border-gray-100 px-4 py-2 flex justify-end items-center gap-4 text-sm max-w-7xl mx-auto">
+      <div className="border-b border-gray-100 px-4 py-2 flex justify-between items-center gap-4 text-sm max-w-7xl mx-auto">
+        <LanguageSwitcher />
         <Link
           href="https://app.blogtec.io"
           className="flex items-center gap-1 text-gray-600 hover:text-black transition-colors"
@@ -30,13 +33,7 @@ export default function Navbar() {
 
       {/* Main nav */}
       <nav className="px-4 py-4 max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-9 h-9 bg-[#E9204F] rounded-full flex items-center justify-center">
-            <span className="text-white font-black text-base">B</span>
-          </div>
-          <span className="text-xl font-black text-black tracking-tight">Blogtec</span>
-        </Link>
+        <BlogtecLogo />
 
         {/* Desktop nav links */}
         <ul className="hidden lg:flex items-center gap-6">
