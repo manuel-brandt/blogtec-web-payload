@@ -25,29 +25,22 @@ export async function generateMetadata(): Promise<Metadata> {
     });
     const page = docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined;
     if (page?.meta?.title || page?.meta?.description) {
+      const title = page.meta?.title ?? "Blogtec";
+      const description = page.meta?.description ?? undefined;
       return {
-        title: page.meta?.title ?? undefined,
-        description: page.meta?.description ?? undefined,
-        openGraph: {
-          title: page.meta?.title ?? undefined,
-          description: page.meta?.description ?? undefined,
-          url: "https://blogtec.io",
-          siteName: "Blogtec",
-        },
+        title: { absolute: title },
+        description,
+        openGraph: { title, description, url: "https://blogtec.io" },
       };
     }
   } catch {}
+  const fallbackTitle = "Blogtec – Marketing Leistungen, einfach ausgelagert.";
+  const fallbackDesc =
+    "SEO, Google-Ads, Design und Entwicklung mit hervorragender Flexibilität und Zuverlässigkeit. Outsorce your marketing with Blogtec.";
   return {
-    title: "Blogtec - Marketing Leistungen, einfach ausgelagert.",
-    description:
-      "SEO, Google-Ads, Design und Entwicklung mit hervorragender Flexibilität und Zuverlässigkeit. Outsorce your marketing with Blogtec.",
-    openGraph: {
-      title: "Blogtec - Marketing Leistungen, einfach ausgelagert.",
-      description:
-        "SEO, Google-Ads, Design und Entwicklung mit hervorragender Flexibilität und Zuverlässigkeit.",
-      url: "https://blogtec.io",
-      siteName: "Blogtec",
-    },
+    title: { absolute: fallbackTitle },
+    description: fallbackDesc,
+    openGraph: { title: fallbackTitle, description: fallbackDesc, url: "https://blogtec.io" },
   };
 }
 

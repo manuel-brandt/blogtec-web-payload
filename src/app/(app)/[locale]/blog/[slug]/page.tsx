@@ -24,18 +24,40 @@ export async function generateMetadata({
       collection: 'blog-posts',
       where: { slug: { equals: slug } },
       locale: lang as 'de' | 'en',
-      depth: 0,
+      depth: 1,
       limit: 1,
     })
     const post = docs[0]
     if (post) {
+      const title = post.meta?.title ?? post.title
+      const description = post.meta?.description ?? post.excerpt ?? undefined
+      const cover =
+        post.coverImage && typeof post.coverImage === 'object'
+          ? (post.coverImage as Media)
+          : null
+      const ogImages = cover?.url
+        ? [{ url: cover.url, width: cover.width ?? 1200, height: cover.height ?? 630, alt: cover.alt ?? title }]
+        : []
       return {
-        title: post.meta?.title ?? post.title ?? undefined,
-        description: post.meta?.description ?? post.excerpt ?? undefined,
+        title,
+        description,
+        openGraph: {
+          title,
+          description,
+          type: 'article',
+          ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
+          ...(ogImages.length > 0 ? { images: ogImages } : {}),
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description,
+          ...(cover?.url ? { images: [cover.url] } : {}),
+        },
       }
     }
   } catch {}
-  return {}
+  return { title: slug.replace(/-/g, ' ') }
 }
 
 function formatDate(dateString: string, locale: string) {
@@ -64,22 +86,6 @@ const ui = {
     back: '← Back to Blog',
     backAll: '← View all posts',
   },
-}
-
-export async function generateStaticParams() {
-  try {
-    const payload = await getPayload({ config })
-    const { docs } = await payload.find({
-      collection: 'blog-posts',
-      locale: 'de',
-      pagination: false,
-      depth: 0,
-    })
-    const locales = ['de', 'en']
-    return locales.flatMap((locale) => docs.map((post) => ({ locale, slug: post.slug })))
-  } catch {
-    return []
-  }
 }
 
 export default async function BlogPostPage({

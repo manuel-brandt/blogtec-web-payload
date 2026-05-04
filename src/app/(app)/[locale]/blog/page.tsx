@@ -34,7 +34,7 @@ export async function generateMetadata({
     }
   } catch {}
   return {
-    title: lang === 'de' ? 'Blog – Blogtec' : 'Blog – Blogtec',
+    title: 'Blog',
     description:
       lang === 'de'
         ? 'Strategien, Tipps und Trends rund um SEO, Content Marketing und digitales Wachstum.'
