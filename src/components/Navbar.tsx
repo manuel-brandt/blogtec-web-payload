@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { BlogtecLogo } from './BlogtecLogo'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
@@ -16,19 +17,21 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+  const isGerman = pathname.startsWith('/de')
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
       {/* Top bar */}
       <div className="border-b border-gray-100 px-4 py-2 flex justify-between items-center gap-4 text-sm max-w-7xl mx-auto">
-        <LanguageSwitcher />
         <Link
           href="https://app.blogtec.io"
           className="flex items-center gap-1 text-gray-600 hover:text-black transition-colors"
         >
           <span className="text-xs">🔒</span>
-          <span>Client Login</span>
+          <span>{isGerman ? 'Kunden-Login' : 'Client Login'}</span>
         </Link>
+        <LanguageSwitcher />
       </div>
 
       {/* Main nav */}

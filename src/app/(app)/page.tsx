@@ -14,6 +14,8 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import type { Metadata } from "next";
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const payload = await getPayload({ config });
