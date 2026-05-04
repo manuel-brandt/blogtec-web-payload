@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { usePathname } from 'next/navigation'
@@ -17,21 +17,39 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
   const isGerman = pathname.startsWith('/de')
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      {/* Top bar */}
-      <div className="border-b border-gray-100 px-4 py-2 flex justify-between items-center gap-4 text-sm max-w-7xl mx-auto">
-        <Link
-          href="https://app.blogtec.io"
-          className="flex items-center gap-1 text-gray-600 hover:text-black transition-colors"
-        >
-          <span className="text-xs">🔒</span>
-          <span>{isGerman ? 'Kunden-Login' : 'Client Login'}</span>
-        </Link>
-        <LanguageSwitcher />
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-200 ${
+        scrolled ? 'bg-white shadow-sm' : 'bg-[#F5EFE8]'
+      }`}
+    >
+      {/* Top bar — collapses on scroll */}
+      <div
+        className={`bg-[#EADCC4] overflow-hidden transition-[max-height,opacity] duration-200 ${
+          scrolled ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100'
+        }`}
+      >
+        <div className="px-4 py-2 flex justify-between items-center gap-4 text-sm max-w-7xl mx-auto">
+          <Link
+            href="https://app.blogtec.io"
+            className="flex items-center gap-1 text-gray-700 hover:text-black transition-colors"
+          >
+            <span className="text-xs">🔒</span>
+            <span>{isGerman ? 'Kunden-Login' : 'Client Login'}</span>
+          </Link>
+          <LanguageSwitcher />
+        </div>
       </div>
 
       {/* Main nav */}
