@@ -30,6 +30,10 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      required: true,
+      admin: {
+        description: 'Alt text for screen readers and SEO. Describe what is in the image.',
+      },
     },
   ],
 }

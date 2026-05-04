@@ -5,6 +5,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { BlogPosts } from './collections/BlogPosts'
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -16,7 +17,7 @@ export default buildConfig({
   admin: {
     user: 'users',
   },
-  collections: [BlogPosts, Media, Users],
+  collections: [BlogPosts, Pages, Media, Users],
   localization: {
     locales: [
       { label: 'Deutsch', code: 'de' },
@@ -40,10 +41,10 @@ export default buildConfig({
       token: process.env.BLOB_READ_WRITE_TOKEN || '',
     }),
     seoPlugin({
-      collections: ['blog-posts'],
+      collections: ['blog-posts', 'pages'],
       tabbedUI: true,
       generateTitle: ({ doc }) => doc.title as string,
-      generateDescription: ({ doc }) => doc.excerpt as string,
+      generateDescription: ({ doc }) => (doc.excerpt as string) ?? '',
     }),
   ],
   typescript: {
