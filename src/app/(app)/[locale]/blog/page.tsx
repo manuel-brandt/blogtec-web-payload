@@ -30,13 +30,17 @@ export async function generateMetadata({
       return docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined
     }
     let page = await findPage(lang as 'de' | 'en')
-    if (!page?.meta?.title && !page?.meta?.description) {
+    let metaTitle = page?.meta?.title?.trim() || undefined
+    let metaDescription = page?.meta?.description?.trim() || undefined
+    if (!metaTitle && !metaDescription) {
       page = await findPage(otherLang)
+      metaTitle = page?.meta?.title?.trim() || undefined
+      metaDescription = page?.meta?.description?.trim() || undefined
     }
-    if (page?.meta?.title || page?.meta?.description) {
+    if (metaTitle || metaDescription) {
       return {
-        title: page.meta?.title ?? undefined,
-        description: page.meta?.description ?? undefined,
+        title: metaTitle,
+        description: metaDescription,
       }
     }
   } catch {}

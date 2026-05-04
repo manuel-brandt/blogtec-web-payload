@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { BlogtecLogo } from './BlogtecLogo'
 
 const footerLinks = {
   Services: [
@@ -32,9 +31,6 @@ export default function Footer() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
-            <div className="mb-4">
-              <BlogtecLogo dark href="/" size={34} />
-            </div>
             <p className="text-sm leading-relaxed mb-4">
               Marketing Services, Easily Outsourced. SEO, Backlinks, Content &amp; more.
             </p>
