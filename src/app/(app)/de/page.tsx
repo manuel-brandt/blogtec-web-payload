@@ -33,9 +33,11 @@ export async function generateMetadata(): Promise<Metadata> {
     if (!page?.meta?.title && !page?.meta?.description) {
       page = await findPage('en');
     }
-    if (page?.meta?.title || page?.meta?.description) {
-      const title = page.meta?.title ?? "Blogtec";
-      const description = page.meta?.description ?? undefined;
+    const metaTitle = page?.meta?.title?.trim() || null;
+    const metaDescription = page?.meta?.description?.trim() || null;
+    if (metaTitle || metaDescription) {
+      const title = metaTitle ?? "Blogtec";
+      const description = metaDescription ?? undefined;
       return {
         title: { absolute: title },
         description,
