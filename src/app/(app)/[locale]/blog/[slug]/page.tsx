@@ -29,24 +29,10 @@ export async function generateMetadata({
     })
     const post = docs[0]
     if (post) {
-      // If no SEO title in this locale, try the other locale before falling back to post.title
-      let metaTitle = post.meta?.title ?? null
-      let metaDescription = post.meta?.description ?? null
-      if (!metaTitle || !metaDescription) {
-        const otherLocale = lang === 'de' ? 'en' : 'de'
-        const { docs: otherDocs } = await payload.find({
-          collection: 'blog-posts',
-          where: { slug: { equals: slug } },
-          locale: otherLocale,
-          depth: 0,
-          limit: 1,
-        })
-        const other = otherDocs[0]
-        if (!metaTitle) metaTitle = other?.meta?.title ?? null
-        if (!metaDescription) metaDescription = other?.meta?.description ?? null
-      }
-      const title = metaTitle ?? post.title
-      const description = metaDescription ?? post.excerpt ?? undefined
+      // Use locale-specific meta; fall back to the localized post.title / post.excerpt.
+      // Never cross-fetch the other locale — that would bleed EN meta onto the DE page.
+      const title = post.meta?.title || post.title
+      const description = post.meta?.description || post.excerpt || undefined
       const cover =
         post.coverImage && typeof post.coverImage === 'object'
           ? (post.coverImage as Media)
