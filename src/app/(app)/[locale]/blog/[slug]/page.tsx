@@ -7,8 +7,36 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import type { Media } from '@/payload-types'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  const lang = locale === 'en' ? 'en' : 'de'
+  try {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'blog-posts',
+      where: { slug: { equals: slug } },
+      locale: lang as 'de' | 'en',
+      depth: 0,
+      limit: 1,
+    })
+    const post = docs[0]
+    if (post) {
+      return {
+        title: post.meta?.title ?? post.title ?? undefined,
+        description: post.meta?.description ?? post.excerpt ?? undefined,
+      }
+    }
+  } catch {}
+  return {}
+}
 
 function formatDate(dateString: string, locale: string) {
   return new Date(dateString).toLocaleDateString(locale === 'en' ? 'en-GB' : 'de-DE', {

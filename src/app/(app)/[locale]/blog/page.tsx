@@ -5,8 +5,42 @@ import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import type { Media } from '@/payload-types'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const lang = locale === 'en' ? 'en' : 'de'
+  try {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'blog' } },
+      locale: lang as 'de' | 'en',
+      depth: 0,
+      limit: 1,
+    })
+    const page = docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined
+    if (page?.meta?.title || page?.meta?.description) {
+      return {
+        title: page.meta?.title ?? undefined,
+        description: page.meta?.description ?? undefined,
+      }
+    }
+  } catch {}
+  return {
+    title: lang === 'de' ? 'Blog – Blogtec' : 'Blog – Blogtec',
+    description:
+      lang === 'de'
+        ? 'Strategien, Tipps und Trends rund um SEO, Content Marketing und digitales Wachstum.'
+        : 'Strategies, tips and trends around SEO, content marketing and digital growth.',
+  }
+}
 
 function formatDate(dateString: string, locale: string) {
   return new Date(dateString).toLocaleDateString(locale === 'en' ? 'en-GB' : 'de-DE', {
