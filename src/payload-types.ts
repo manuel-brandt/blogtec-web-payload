@@ -127,6 +127,7 @@ export interface UserAuthOperations {
  */
 export interface BlogPost {
   id: number;
+  noIndex?: boolean | null;
   title: string;
   /**
    * Auto-generated from title on first save. Override if needed.

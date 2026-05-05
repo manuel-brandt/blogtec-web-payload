@@ -7,9 +7,10 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const payload = await getPayload({ config })
-    // Fetch all posts — publishedAt is informational only, there is no draft/status gate
+    // Exclude posts explicitly marked noIndex
     const { docs } = await payload.find({
       collection: 'blog-posts',
+      where: { noIndex: { not_equals: true } },
       sort: '-publishedAt',
       limit: 1000,
       depth: 0,

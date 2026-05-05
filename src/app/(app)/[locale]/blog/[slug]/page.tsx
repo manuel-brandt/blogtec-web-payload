@@ -30,6 +30,14 @@ export async function generateMetadata({
     })
     const post = docs[0]
     if (post) {
+      const canonicalPath = lang === 'de' ? `/de/blog/${slug}` : `/blog/${slug}`
+      if (post.noIndex) {
+        return {
+          title: post.title,
+          robots: { index: false, follow: false },
+          alternates: getAlternates(canonicalPath),
+        }
+      }
       // Use locale-specific meta; fall back to the localized post.title / post.excerpt.
       // Never cross-fetch the other locale — that would bleed EN meta onto the DE page.
       const title = post.meta?.title || post.title
@@ -41,7 +49,6 @@ export async function generateMetadata({
       const ogImages = cover?.url
         ? [{ url: cover.url, width: cover.width ?? 1200, height: cover.height ?? 630, alt: cover.alt ?? title }]
         : []
-      const canonicalPath = lang === 'de' ? `/de/blog/${slug}` : `/blog/${slug}`
       return {
         title,
         description,
