@@ -4,42 +4,49 @@ import { getSiteBase } from '@/lib/alternates'
 
 export const dynamic = 'force-dynamic'
 
-function urlBlock(base: string, enPath: string, dePath: string, priority = '0.8') {
-  return `
-  <url>
-    <loc>${base}${enPath}</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>
-    <xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${enPath}"/>
-    <changefreq>weekly</changefreq>
-    <priority>${priority}</priority>
-  </url>
-  <url>
-    <loc>${base}${dePath}</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>
-    <xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${enPath}"/>
-    <changefreq>weekly</changefreq>
-    <priority>${priority}</priority>
-  </url>`
-}
-
 export async function GET() {
   try {
     const payload = await getPayload({ config })
-    const { docs } = await payload.find({
-      collection: 'pages',
-      where: { noIndex: { not_equals: true } },
-      limit: 100,
-      depth: 0,
-    })
     const base = getSiteBase()
 
-    const urls = docs.map((page) => {
-      const enPath = page.slug === 'home' ? '/' : `/${page.slug}`
-      const dePath = page.slug === 'home' ? '/de' : `/de/${page.slug}`
-      const priority = page.slug === 'home' ? '1.0' : '0.8'
-      return urlBlock(base, enPath, dePath, priority)
+    const [{ docs: enDocs }, { docs: deDocs }] = await Promise.all([
+      payload.find({ collection: 'pages', where: { noIndex: { not_equals: true } }, locale: 'en', limit: 100, depth: 0 }),
+      payload.find({ collection: 'pages', where: { noIndex: { not_equals: true } }, locale: 'de', limit: 100, depth: 0 }),
+    ])
+
+    const enSlugs = new Set(enDocs.map((p) => p.slug))
+    const deSlugs = new Set(deDocs.map((p) => p.slug))
+    const allSlugs = new Set([...enSlugs, ...deSlugs])
+
+    const urls = Array.from(allSlugs).map((slug) => {
+      const enPath = slug === 'home' ? '/' : `/${slug}`
+      const dePath = slug === 'home' ? '/de' : `/de/${slug}`
+      const priority = slug === 'home' ? '1.0' : '0.8'
+      const enIndexed = enSlugs.has(slug)
+      const deIndexed = deSlugs.has(slug)
+
+      const hreflang = [
+        enIndexed ? `<xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>` : '',
+        deIndexed ? `<xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>` : '',
+        `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${enIndexed ? enPath : dePath}"/>`,
+      ].filter(Boolean).join('\n    ')
+
+      return [
+        enIndexed ? `
+  <url>
+    <loc>${base}${enPath}</loc>
+    ${hreflang}
+    <changefreq>weekly</changefreq>
+    <priority>${priority}</priority>
+  </url>` : '',
+        deIndexed ? `
+  <url>
+    <loc>${base}${dePath}</loc>
+    ${hreflang}
+    <changefreq>weekly</changefreq>
+    <priority>${priority}</priority>
+  </url>` : '',
+      ].join('')
     }).join('')
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>

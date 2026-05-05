@@ -36,9 +36,10 @@ export const BlogPosts: CollectionConfig = {
     {
       name: 'noIndex',
       type: 'checkbox',
+      localized: true,
       defaultValue: false,
       admin: {
-        description: 'Exclude from search engines and remove from sitemap (same as Yoast noindex).',
+        description: 'Exclude this language version from search engines and the sitemap.',
         position: 'sidebar',
       },
     },

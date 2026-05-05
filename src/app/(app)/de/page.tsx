@@ -30,12 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
       });
       return docs[0] as { noIndex?: boolean | null; meta?: { title?: string | null; description?: string | null } } | undefined;
     };
-    let page = await findPage('de');
+    const primaryPage = await findPage('de');
+    // noIndex is locale-specific — always check the DE value, before any content fallback
+    if (primaryPage?.noIndex) {
+      return { robots: { index: false, follow: false }, alternates: getAlternates('/de') };
+    }
+    let page = primaryPage;
     if (!page?.meta?.title && !page?.meta?.description) {
       page = await findPage('en');
-    }
-    if (page?.noIndex) {
-      return { robots: { index: false, follow: false }, alternates: getAlternates('/de') };
     }
     const metaTitle = page?.meta?.title?.trim() || null;
     const metaDescription = page?.meta?.description?.trim() || null;

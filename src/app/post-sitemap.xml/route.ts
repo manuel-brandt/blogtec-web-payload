@@ -7,39 +7,56 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const payload = await getPayload({ config })
-    // Exclude posts explicitly marked noIndex
-    const { docs } = await payload.find({
-      collection: 'blog-posts',
-      where: { noIndex: { not_equals: true } },
-      sort: '-publishedAt',
-      limit: 1000,
-      depth: 0,
-    })
     const base = getSiteBase()
 
-    const urls = docs.map((post) => {
-      const enPath = `/blog/${post.slug}`
-      const dePath = `/de/blog/${post.slug}`
-      const lastmod = post.updatedAt ? new Date(post.updatedAt).toISOString().split('T')[0] : ''
-      return `
+    const [{ docs: enDocs }, { docs: deDocs }] = await Promise.all([
+      payload.find({ collection: 'blog-posts', where: { noIndex: { not_equals: true } }, locale: 'en', sort: '-publishedAt', limit: 1000, depth: 0 }),
+      payload.find({ collection: 'blog-posts', where: { noIndex: { not_equals: true } }, locale: 'de', sort: '-publishedAt', limit: 1000, depth: 0 }),
+    ])
+
+    const enSlugs = new Set(enDocs.map((p) => p.slug))
+    const deSlugs = new Set(deDocs.map((p) => p.slug))
+    const allSlugs = new Set([...enSlugs, ...deSlugs])
+
+    // Build slug → updatedAt map from whichever locale has it
+    const updatedAtMap = new Map<string, string>()
+    for (const doc of [...enDocs, ...deDocs]) {
+      if (doc.slug && doc.updatedAt && !updatedAtMap.has(doc.slug)) {
+        updatedAtMap.set(doc.slug, new Date(doc.updatedAt).toISOString().split('T')[0])
+      }
+    }
+
+    const urls = Array.from(allSlugs).map((slug) => {
+      const enPath = `/blog/${slug}`
+      const dePath = `/de/blog/${slug}`
+      const lastmod = updatedAtMap.get(slug) ?? ''
+      const enIndexed = enSlugs.has(slug)
+      const deIndexed = deSlugs.has(slug)
+
+      const hreflang = [
+        enIndexed ? `<xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>` : '',
+        deIndexed ? `<xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>` : '',
+        `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${enIndexed ? enPath : dePath}"/>`,
+      ].filter(Boolean).join('\n    ')
+
+      return [
+        enIndexed ? `
   <url>
     <loc>${base}${enPath}</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>
-    <xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${enPath}"/>
+    ${hreflang}
     ${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>
+  </url>` : '',
+        deIndexed ? `
   <url>
     <loc>${base}${dePath}</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>
-    <xhtml:link rel="alternate" hreflang="de" href="${base}${dePath}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${enPath}"/>
+    ${hreflang}
     ${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`
+  </url>` : '',
+      ].join('')
     }).join('')
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
