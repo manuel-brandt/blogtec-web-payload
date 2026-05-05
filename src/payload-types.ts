@@ -170,6 +170,7 @@ export interface BlogPost {
  */
 export interface Page {
   id: number;
+  noIndex?: boolean | null;
   title: string;
   slug: string;
   meta?: {

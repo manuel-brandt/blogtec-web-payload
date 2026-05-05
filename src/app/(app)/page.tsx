@@ -28,11 +28,14 @@ export async function generateMetadata(): Promise<Metadata> {
         depth: 0,
         limit: 1,
       });
-      return docs[0] as { meta?: { title?: string | null; description?: string | null } } | undefined;
+      return docs[0] as { noIndex?: boolean | null; meta?: { title?: string | null; description?: string | null } } | undefined;
     };
     let page = await findPage('en');
     if (!page?.meta?.title && !page?.meta?.description) {
       page = await findPage('de');
+    }
+    if (page?.noIndex) {
+      return { robots: { index: false, follow: false }, alternates: getAlternates('/') };
     }
     const metaTitle = page?.meta?.title?.trim() || null;
     const metaDescription = page?.meta?.description?.trim() || null;

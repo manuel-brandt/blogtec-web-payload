@@ -9,6 +9,15 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     {
+      name: 'noIndex',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Exclude from search engines and remove from sitemap (same as Yoast noindex).',
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,

@@ -27,7 +27,12 @@ function urlBlock(base: string, enPath: string, dePath: string, priority = '0.8'
 export async function GET() {
   try {
     const payload = await getPayload({ config })
-    const { docs } = await payload.find({ collection: 'pages', limit: 100, depth: 0 })
+    const { docs } = await payload.find({
+      collection: 'pages',
+      where: { noIndex: { not_equals: true } },
+      limit: 100,
+      depth: 0,
+    })
     const base = getSiteBase()
 
     const urls = docs.map((page) => {
