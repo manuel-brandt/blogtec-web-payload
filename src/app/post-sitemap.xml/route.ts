@@ -27,8 +27,8 @@ export async function GET() {
     }
 
     const urls = Array.from(allSlugs).map((slug) => {
-      const enPath = `/blog/${slug}`
-      const dePath = `/de/blog/${slug}`
+      const enPath = `/blog/${slug}/`
+      const dePath = `/de/blog/${slug}/`
       const lastmod = updatedAtMap.get(slug) ?? ''
       const enIndexed = enSlugs.has(slug)
       const deIndexed = deSlugs.has(slug)

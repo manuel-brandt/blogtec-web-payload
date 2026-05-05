@@ -19,8 +19,8 @@ export async function GET() {
     const allSlugs = new Set([...enSlugs, ...deSlugs])
 
     const urls = Array.from(allSlugs).map((slug) => {
-      const enPath = slug === 'home' ? '/' : `/${slug}`
-      const dePath = slug === 'home' ? '/de' : `/de/${slug}`
+      const enPath = slug === 'home' ? '/' : `/${slug}/`
+      const dePath = slug === 'home' ? '/de/' : `/de/${slug}/`
       const priority = slug === 'home' ? '1.0' : '0.8'
       const enIndexed = enSlugs.has(slug)
       const deIndexed = deSlugs.has(slug)
