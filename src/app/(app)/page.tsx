@@ -13,6 +13,7 @@ import Footer from "@/components/Footer";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { Metadata } from "next";
+import { getAlternates } from "@/lib/alternates";
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       return {
         title: { absolute: title },
         description,
-        alternates: { canonical: '/', languages: { 'en': '/', 'de': '/de' } },
+        alternates: getAlternates('/'),
         openGraph: { title, description, url: "https://blogtec.io" },
       };
     }

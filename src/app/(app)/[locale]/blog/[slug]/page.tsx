@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import type { Media } from '@/payload-types'
 import type { Metadata } from 'next'
+import { getAlternates } from '@/lib/alternates'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,9 +41,11 @@ export async function generateMetadata({
       const ogImages = cover?.url
         ? [{ url: cover.url, width: cover.width ?? 1200, height: cover.height ?? 630, alt: cover.alt ?? title }]
         : []
+      const canonicalPath = lang === 'de' ? `/de/blog/${slug}` : `/blog/${slug}`
       return {
         title,
         description,
+        alternates: getAlternates(canonicalPath),
         openGraph: {
           title,
           description,
@@ -59,7 +62,8 @@ export async function generateMetadata({
       }
     }
   } catch {}
-  return { title: slug.replace(/-/g, ' ') }
+  const canonicalPath = lang === 'de' ? `/de/blog/${slug}` : `/blog/${slug}`
+  return { title: slug.replace(/-/g, ' '), alternates: getAlternates(canonicalPath) }
 }
 
 function formatDate(dateString: string, locale: string) {

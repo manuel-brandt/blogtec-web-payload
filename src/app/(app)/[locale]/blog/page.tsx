@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import type { Media } from '@/payload-types'
 import type { Metadata } from 'next'
+import { getAlternates } from '@/lib/alternates'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,19 +38,23 @@ export async function generateMetadata({
       metaTitle = page?.meta?.title?.trim() || undefined
       metaDescription = page?.meta?.description?.trim() || undefined
     }
+    const canonicalPath = lang === 'de' ? '/de/blog' : '/blog'
     if (metaTitle || metaDescription) {
       return {
         title: metaTitle,
         description: metaDescription,
+        alternates: getAlternates(canonicalPath),
       }
     }
   } catch {}
+  const canonicalPath = lang === 'de' ? '/de/blog' : '/blog'
   return {
     title: 'Blog',
     description:
       lang === 'de'
         ? 'Strategien, Tipps und Trends rund um SEO, Content Marketing und digitales Wachstum.'
         : 'Strategies, tips and trends around SEO, content marketing and digital growth.',
+    alternates: getAlternates(canonicalPath),
   }
 }
 

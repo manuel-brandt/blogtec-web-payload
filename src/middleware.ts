@@ -28,10 +28,14 @@ export function middleware(request: NextRequest) {
 
   // English blog routes: /blog → internally /en/blog so [locale] receives 'en'
   if (pathname.startsWith('/blog')) {
-    return NextResponse.rewrite(new URL(`/en${pathname}`, request.url))
+    const rewrite = NextResponse.rewrite(new URL(`/en${pathname}`, request.url))
+    rewrite.headers.set('x-pathname', pathname)
+    return rewrite
   }
 
-  return NextResponse.next()
+  const next = NextResponse.next()
+  next.headers.set('x-pathname', pathname)
+  return next
 }
 
 export const config = {
