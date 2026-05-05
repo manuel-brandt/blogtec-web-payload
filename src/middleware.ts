@@ -23,7 +23,9 @@ export function middleware(request: NextRequest) {
 
   // German routes pass through unchanged
   if (pathname.startsWith('/de')) {
-    return NextResponse.next()
+    const next = NextResponse.next()
+    next.headers.set('x-pathname', pathname)
+    return next
   }
 
   // English blog routes: /blog → internally /en/blog so [locale] receives 'en'
