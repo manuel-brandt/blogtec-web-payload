@@ -5,22 +5,22 @@ import { getSiteBase } from '@/lib/alternates'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const payload = await getPayload({ config })
-  const now = new Date().toISOString()
-  const { docs } = await payload.find({
-    collection: 'blog-posts',
-    where: { publishedAt: { less_than_equal: now } },
-    sort: '-publishedAt',
-    limit: 1000,
-    depth: 0,
-  })
-  const base = getSiteBase()
+  try {
+    const payload = await getPayload({ config })
+    // Fetch all posts — publishedAt is informational only, there is no draft/status gate
+    const { docs } = await payload.find({
+      collection: 'blog-posts',
+      sort: '-publishedAt',
+      limit: 1000,
+      depth: 0,
+    })
+    const base = getSiteBase()
 
-  const urls = docs.map((post) => {
-    const enPath = `/blog/${post.slug}`
-    const dePath = `/de/blog/${post.slug}`
-    const lastmod = post.updatedAt ? new Date(post.updatedAt).toISOString().split('T')[0] : ''
-    return `
+    const urls = docs.map((post) => {
+      const enPath = `/blog/${post.slug}`
+      const dePath = `/de/blog/${post.slug}`
+      const lastmod = post.updatedAt ? new Date(post.updatedAt).toISOString().split('T')[0] : ''
+      return `
   <url>
     <loc>${base}${enPath}</loc>
     <xhtml:link rel="alternate" hreflang="en" href="${base}${enPath}"/>
@@ -39,13 +39,20 @@ export async function GET() {
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`
-  }).join('')
+    }).join('')
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls}
 </urlset>`
 
-  return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } })
+    return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } })
+  } catch (err) {
+    console.error('[post-sitemap]', err)
+    return new Response(
+      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>`,
+      { status: 500, headers: { 'Content-Type': 'application/xml; charset=utf-8' } }
+    )
+  }
 }
