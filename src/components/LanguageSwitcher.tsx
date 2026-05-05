@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 
@@ -49,14 +48,14 @@ export function LanguageSwitcher() {
 
       {open && (
         <div className="absolute right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50 min-w-[130px]">
-          <Link
+          <a
             href={otherUrl}
             className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             onClick={() => setOpen(false)}
           >
             <span className="text-base leading-none">{languages[other].flag}</span>
             <span>{languages[other].label}</span>
-          </Link>
+          </a>
         </div>
       )}
     </div>
