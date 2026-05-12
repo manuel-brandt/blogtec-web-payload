@@ -330,6 +330,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const offset = parseInt(req.nextUrl.searchParams.get('offset') ?? '0', 10)
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10)
+
   const xmlPath = path.join(process.cwd(), 'scripts', 'wp-export.xml')
   const payload = await getPayload({ config: await configPromise })
   const mediaCache = new Map<string, string>() // url → payloadMediaId
@@ -354,7 +357,25 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const pairs = Array.from(groupMap.values())
+  // Flatten into a single ordered work list: paired groups first, then singles
+  const allPairs = Array.from(groupMap.values())
+  const allSingles = [
+    ...allPairs.filter(p => !(p.de && p.en)).map(p => (p.de ?? p.en)!),
+    ...ungrouped,
+  ]
+  const completePairs = allPairs.filter(p => p.de && p.en)
+  // Work list index: completePairs[0..n-1] then singles[0..m-1]
+  const totalWork = completePairs.length + allSingles.length
+  const batch = {
+    pairs: completePairs.slice(offset, offset + limit),
+    singles: [] as WPPost[],
+  }
+  const pairsEnd = Math.min(offset + limit, completePairs.length)
+  if (pairsEnd < offset + limit) {
+    const singlesStart = Math.max(0, offset - completePairs.length)
+    batch.singles = allSingles.slice(singlesStart, singlesStart + (limit - batch.pairs.length))
+  }
+
   const results: string[] = []
   let created = 0, failed = 0
 
@@ -391,8 +412,8 @@ export async function GET(req: NextRequest) {
     return res.docs[0] ? String(res.docs[0].id) : null
   }
 
-  // Paired DE+EN posts
-  for (const pair of pairs.filter(p => p.de && p.en)) {
+  // Paired DE+EN posts (this batch)
+  for (const pair of batch.pairs) {
     const { de, en } = pair as { de: WPPost; en: WPPost }
     const slug = en.slug || de.slug
     try {
@@ -413,12 +434,8 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Single-locale posts
-  const singles = [
-    ...pairs.filter(p => !(p.de && p.en)).map(p => (p.de ?? p.en)!),
-    ...ungrouped,
-  ]
-  for (const post of singles) {
+  // Single-locale posts (this batch)
+  for (const post of batch.singles) {
     try {
       const existingId = await findBySlug(post.slug)
       const data = await buildData(post)
@@ -434,11 +451,18 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const nextOffset = offset + limit
   return NextResponse.json({
-    message: `Migration complete: ${created} created, ${failed} failed`,
-    total: allPosts.length,
+    message: `Batch ${offset}–${offset + limit - 1} done: ${created} updated, ${failed} failed`,
+    total: totalWork,
+    offset,
+    limit,
     created,
     failed,
-    errors: results.slice(0, 20),
+    done: nextOffset >= totalWork,
+    next: nextOffset < totalWork
+      ? `/api/migrate-wp?secret=${SECRET}&offset=${nextOffset}&limit=${limit}`
+      : null,
+    errors: results,
   })
 }
