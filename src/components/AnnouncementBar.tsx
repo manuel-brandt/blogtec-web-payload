@@ -21,8 +21,8 @@ export default function AnnouncementBar({ locale = 'en' }: { locale?: 'en' | 'de
   if (dismissed) return null
 
   return (
-    <div className="bg-[#1A1A1A] text-white text-center py-3 px-4 flex items-center justify-center gap-3 text-sm relative">
-      <span className="text-[#F9E90A]">🔗</span>
+    <div className="bg-[#E9204F] text-white text-center py-3 px-4 flex items-center justify-center gap-3 text-sm relative">
+      <span>🚀</span>
       <span>{t.text}</span>
       <Link
         href={locale === 'de' ? '/de/link-center' : '/link-center'}

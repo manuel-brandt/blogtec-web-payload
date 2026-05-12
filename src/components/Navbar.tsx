@@ -107,7 +107,7 @@ const navLinks = [
   { label: 'Link Center', href: '/link-center', hasDropdown: false },
   { label: 'White Label', href: '/white-label', hasDropdown: false },
   { label: 'Case Studies', href: '/case-studies', hasDropdown: false },
-  { label: 'Resources', href: '/resources', hasDropdown: false },
+  { label: 'Resources', href: '/resources', hasDropdown: true },
 ]
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -182,7 +182,8 @@ export default function Navbar() {
         {/* Desktop nav links */}
         <ul className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => {
-            if (link.hasDropdown) {
+            // Services: full mega-menu trigger
+            if (link.label === 'Services') {
               return (
                 <li key={link.label}>
                   <button
@@ -210,6 +211,7 @@ export default function Navbar() {
                   className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-black transition-colors"
                 >
                   {link.label}
+                  {link.hasDropdown && <ChevronDown size={14} />}
                 </Link>
               </li>
             )
@@ -222,7 +224,7 @@ export default function Navbar() {
             href="/consultation"
             className="border border-black text-black rounded-pill px-5 py-2.5 text-sm font-bold uppercase tracking-wide hover:bg-gray-50 transition-colors"
           >
-            BOOK CONSULTATION
+            CONTACT US
           </Link>
           <Link
             href="https://app.blogtec.io/register/"
@@ -380,7 +382,7 @@ export default function Navbar() {
               href="/consultation"
               className="block text-center border border-black text-black rounded-pill px-5 py-2.5 text-sm font-bold uppercase tracking-wide"
             >
-              BOOK CONSULTATION
+              CONTACT US
             </Link>
             <Link
               href="https://app.blogtec.io/register/"

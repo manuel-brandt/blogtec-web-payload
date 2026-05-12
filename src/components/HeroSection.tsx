@@ -3,24 +3,18 @@ import Link from 'next/link'
 
 const ui = {
   en: {
-    badge: '✦ New: Design & Development',
-    heading1: 'Marketing Services,',
+    heading1: 'SEO Services,',
     heading2: 'Easily Outsourced.',
-    subheading: 'SEO, Google Ads, Design & Development services with excellent flexibility and reliability.',
+    subheading: 'SEO, backlinks, Google Ads, and web design with excellent flexibility and reliability. Tailored to agencies and marketing teams.',
     signUp: 'SIGN UP FREE',
-    consultation: 'BOOK CONSULTATION',
     signUpHref: 'https://app.blogtec.io/register/',
-    consultationHref: '/consultation',
   },
   de: {
-    badge: '✦ Neu: Design & Entwicklung',
-    heading1: 'Marketing-Leistungen,',
+    heading1: 'SEO-Leistungen,',
     heading2: 'einfach ausgelagert.',
-    subheading: 'SEO, Google Ads, Design & Entwicklung – mit hervorragender Flexibilität und Zuverlässigkeit.',
+    subheading: 'SEO, Backlinks, Google Ads und Webdesign – mit hervorragender Flexibilität und Zuverlässigkeit. Maßgeschneidert für Agenturen und Marketing-Teams.',
     signUp: 'KOSTENLOS REGISTRIEREN',
-    consultation: 'BERATUNG BUCHEN',
     signUpHref: 'https://app.blogtec.io/register/',
-    consultationHref: '/de/consultation',
   },
 }
 
@@ -32,9 +26,6 @@ export default function HeroSection({ locale = 'en' }: { locale?: 'en' | 'de' })
       <div className="max-w-7xl mx-auto px-4 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
         {/* Left: copy */}
         <div className="space-y-6">
-          <span className="inline-block bg-white text-[#E9204F] text-xs font-bold px-3 py-1.5 rounded-pill border border-red-100 shadow-sm">
-            {t.badge}
-          </span>
           <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black text-black leading-[1.08] tracking-tight">
             {t.heading1}{' '}
             <span className="block">{t.heading2}</span>
@@ -42,23 +33,17 @@ export default function HeroSection({ locale = 'en' }: { locale?: 'en' | 'de' })
           <p className="text-lg text-gray-700 max-w-md leading-relaxed">
             {t.subheading}
           </p>
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="pt-2">
             <Link
               href={t.signUpHref}
               className="bg-[#E9204F] text-white rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-[#d01a44] transition-colors shadow-lg"
             >
               {t.signUp}
             </Link>
-            <Link
-              href={t.consultationHref}
-              className="border border-black text-black rounded-pill px-7 py-3.5 font-bold uppercase tracking-wide text-sm hover:bg-white/50 transition-colors"
-            >
-              {t.consultation}
-            </Link>
           </div>
         </div>
 
-        {/* Right: real app screenshot + blob */}
+        {/* Right: app screenshot + blob + floating badges */}
         <div className="relative hidden lg:block h-[460px]">
           {/* Blob background */}
           <div className="absolute inset-0 flex items-center justify-center">
