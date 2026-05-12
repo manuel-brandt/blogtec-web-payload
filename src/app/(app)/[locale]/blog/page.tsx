@@ -1,7 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import Link from 'next/link'
-import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import type { Media } from '@/payload-types'
@@ -147,7 +146,8 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                     {/* Cover image */}
                     <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
                       {cover?.url ? (
-                        <Image
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
                           src={cover.url}
                           alt={cover.alt ?? post.title ?? ''}
                           width={640}

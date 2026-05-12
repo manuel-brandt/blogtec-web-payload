@@ -185,7 +185,8 @@ export default async function BlogPostPage({
         {/* Cover image */}
         {cover?.url && (
           <div className="max-w-4xl mx-auto px-4 pt-10">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={cover.url}
               alt={cover.alt ?? post.title ?? ''}
               width={1200}
