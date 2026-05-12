@@ -333,13 +333,9 @@ async function fetchMedia(
       file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
     })
 
-    // Patch the url to the actual Vercel Blob URL
-    await payload.update({
-      collection: 'media',
-      id: doc.id,
-      data: { url: blob.url } as any,
-      overrideAccess: true,
-    })
+    // payload.update doesn't persist url for upload collections — patch via raw SQL
+    const pool = (payload.db as any).pool
+    await pool.query('UPDATE media SET url = $1 WHERE id = $2', [blob.url, doc.id])
 
     const id = Number(doc.id)
     cache.set(url, id)
