@@ -319,18 +319,28 @@ async function fetchMedia(
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
     const alt = filename.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '')
 
-    // Upload directly to Vercel Blob to get a public URL
+    // Upload to Vercel Blob to get the public URL
     const blob = await put(`media/${filename}`, buffer, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN,
       addRandomSuffix: true,
     })
 
-    // Create the Payload media record with the blob URL set explicitly
+    // Create the Payload media record (url will default to local /api/media/file/...)
     const doc = await payload.create({
       collection: 'media',
-      data: { alt, url: blob.url, filename, mimeType, filesize: buffer.length } as any,
+      data: { alt } as any,
+      file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
     })
+
+    // Patch the url to the actual Vercel Blob URL
+    await payload.update({
+      collection: 'media',
+      id: doc.id,
+      data: { url: blob.url } as any,
+      overrideAccess: true,
+    })
+
     const id = Number(doc.id)
     cache.set(url, id)
     return id
