@@ -81,13 +81,15 @@ const linkNode = (url: string, newTab: boolean, children: LexicalNode[]): Lexica
   format: '', indent: 0, type: 'link', version: 3,
 })
 
-const uploadNode = (mediaId: string, alt: string): LexicalNode => ({
+const uploadNode = (mediaId: number, alt: string): LexicalNode => ({
   type: 'upload',
   version: 3,
+  direction: null,
+  format: '',
+  indent: 0,
   relationTo: 'media',
   value: { id: mediaId },
   fields: { alt: alt || null, caption: null },
-  format: '',
 })
 
 function convertInline(nodes: ChildNode[], format = 0): LexicalNode[] {
@@ -119,14 +121,14 @@ function convertInline(nodes: ChildNode[], format = 0): LexicalNode[] {
   return result
 }
 
-function resolveImgSrc(src: string, imageMap: Record<string, string>): string | null {
+function resolveImgSrc(src: string, imageMap: Record<string, number>): number | null {
   if (imageMap[src]) return imageMap[src]
   // Try stripping scaled suffix: image-300x200.jpg → image.jpg
   const original = src.replace(/-\d+x\d+(\.[^.?]+)$/, '$1')
   return original !== src ? (imageMap[original] ?? null) : null
 }
 
-function convertBlock(el: Element, imageMap: Record<string, string>): LexicalNode[] {
+function convertBlock(el: Element, imageMap: Record<string, number>): LexicalNode[] {
   const tag = el.tagName.toLowerCase()
   if (tag === 'p' || tag === 'div') {
     const text = el.textContent?.trim()
@@ -175,7 +177,7 @@ function convertBlock(el: Element, imageMap: Record<string, string>): LexicalNod
   return blocks
 }
 
-function htmlToLexical(html: string, imageMap: Record<string, string> = {}): LexicalNode {
+function htmlToLexical(html: string, imageMap: Record<string, number> = {}): LexicalNode {
   const clean = html.replace(/<!--[\s\S]*?-->/g, '').trim()
   const win = new Window()
   const wrapper = win.document.createElement('div')
@@ -295,13 +297,13 @@ function parseXML(xmlPath: string): WPPost[] {
 
 // ─── Image downloader ────────────────────────────────────────────────────────
 
-// Downloads a URL and creates a Payload media record. Returns the media ID or null.
+// Downloads a URL and creates a Payload media record. Returns the numeric media ID or null.
 async function fetchMedia(
   url: string,
   payload: Awaited<ReturnType<typeof getPayload>>,
-  cache: Map<string, string>,
+  cache: Map<string, number>,
   errors: string[],
-): Promise<string | null> {
+): Promise<number | null> {
   if (cache.has(url)) return cache.get(url)!
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
@@ -318,8 +320,9 @@ async function fetchMedia(
       data: { alt },
       file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
     })
-    cache.set(url, String(doc.id))
-    return String(doc.id)
+    const id = Number(doc.id)
+    cache.set(url, id)
+    return id
   } catch (err: any) {
     errors.push(`IMG ERR ${url}: ${err?.message}`)
     return null
@@ -340,7 +343,7 @@ export async function GET(req: NextRequest) {
 
   const xmlPath = path.join(process.cwd(), 'scripts', 'wp-export.xml')
   const payload = await getPayload({ config: await configPromise })
-  const mediaCache = new Map<string, string>() // url → payloadMediaId
+  const mediaCache = new Map<string, number>() // url → numeric payloadMediaId
   const mediaErrors: string[] = []
 
   let allPosts: WPPost[]
@@ -390,7 +393,7 @@ export async function GET(req: NextRequest) {
       ? await fetchMedia(post.coverImageUrl, payload, mediaCache, mediaErrors)
       : null
     // Build image map for in-content images from this post's content
-    const contentImageMap: Record<string, string> = {}
+    const contentImageMap: Record<string, number> = {}
     const imgSrcs = [...post.content.matchAll(/src="(https?:\/\/blogtec\.io\/wp-content\/uploads\/[^"]+)"/g)]
       .map(m => m[1])
     for (const src of imgSrcs) {
