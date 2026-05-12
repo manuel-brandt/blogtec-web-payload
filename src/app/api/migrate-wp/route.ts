@@ -164,7 +164,7 @@ function htmlToLexical(html: string): LexicalNode {
   }
 }
 
-// ─── XML parser ──────────────────────────────────────────────────────────────
+// ─── XML parser (regex-based — happy-dom getElementsByTagNameNS is broken) ────
 
 interface WPPost {
   id: string; title: string; slug: string; date: string; author: string
@@ -174,52 +174,82 @@ interface WPPost {
   yoastNoIndex: boolean; coverImageUrl: string | null
 }
 
-function getMeta(item: Element, key: string, WP_NS: string): string | null {
-  for (const meta of Array.from(item.getElementsByTagNameNS(WP_NS, 'postmeta'))) {
-    if (meta.getElementsByTagNameNS(WP_NS, 'meta_key')[0]?.textContent?.trim() === key) {
-      return meta.getElementsByTagNameNS(WP_NS, 'meta_value')[0]?.textContent?.trim() ?? null
+// Extract text content of a tag (with optional namespace prefix), CDATA-aware.
+function rx(block: string, tag: string): string {
+  const t = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const m = block.match(new RegExp(`<${t}[^>]*>(?:<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([^<]*))<\\/${t}>`))
+  return (m?.[1] ?? m?.[2] ?? '').trim()
+}
+
+// Extract all occurrences of a tag as an array of raw inner strings.
+function rxAll(block: string, tag: string): string[] {
+  const t = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`<${t}([\\s\\S]*?)<\\/${t}>`, 'g')
+  const results: string[] = []
+  let m: RegExpExecArray | null
+  while ((m = re.exec(block)) !== null) results.push(m[0])
+  return results
+}
+
+
+function getMetaRx(block: string, key: string): string | null {
+  for (const meta of rxAll(block, 'wp:postmeta')) {
+    if (rx(meta, 'wp:meta_key') === key) {
+      return rx(meta, 'wp:meta_value') || null
     }
   }
   return null
 }
 
+function splitItems(xml: string): string[] {
+  const items: string[] = []
+  const re = /<item>([\s\S]*?)<\/item>/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(xml)) !== null) items.push(m[0])
+  return items
+}
+
 function parseXML(xmlPath: string): WPPost[] {
   const xml = readFileSync(xmlPath, 'utf-8')
-  const win = new Window()
-  const xmlDoc = new win.DOMParser().parseFromString(xml, 'text/xml') as unknown as Document
-  const WP_NS = 'http://wordpress.org/export/1.2/'
-  const DC_NS = 'http://purl.org/dc/elements/1.1/'
-  const CONTENT_NS = 'http://purl.org/rss/1.0/modules/content/'
-  const EXCERPT_NS = 'http://wordpress.org/export/1.2/excerpt/'
   const posts: WPPost[] = []
-  for (const item of Array.from(xmlDoc.getElementsByTagName('item'))) {
-    const postType = item.getElementsByTagNameNS(WP_NS, 'post_type')[0]?.textContent?.trim()
-    const status = item.getElementsByTagNameNS(WP_NS, 'status')[0]?.textContent?.trim()
+
+  for (const item of splitItems(xml)) {
+    const postType = rx(item, 'wp:post_type')
+    const status = rx(item, 'wp:status')
     if (postType !== 'post' || status !== 'publish') continue
-    const id = item.getElementsByTagNameNS(WP_NS, 'post_id')[0]?.textContent?.trim() ?? ''
-    const title = item.getElementsByTagName('title')[0]?.textContent?.trim() ?? ''
-    const slug = item.getElementsByTagNameNS(WP_NS, 'post_name')[0]?.textContent?.trim() ?? ''
-    const date = item.getElementsByTagNameNS(WP_NS, 'post_date')[0]?.textContent?.trim() ?? ''
-    const author = item.getElementsByTagNameNS(DC_NS, 'creator')[0]?.textContent?.trim() ?? ''
-    const content = item.getElementsByTagNameNS(CONTENT_NS, 'encoded')[0]?.textContent?.trim() ?? ''
-    const excerpt = (item.getElementsByTagNameNS(EXCERPT_NS, 'encoded')[0]?.textContent?.trim() ?? '')
-      .replace(/<[^>]+>/g, '').trim()
-    let language = 'de', translationGroup: string | null = null
+
+    const id = rx(item, 'wp:post_id')
+    const title = rx(item, 'title')
+    const slug = rx(item, 'wp:post_name')
+    const date = rx(item, 'wp:post_date')
+    const author = rx(item, 'dc:creator')
+    const content = rx(item, 'content:encoded')
+    const rawExcerpt = rx(item, 'excerpt:encoded').replace(/<[^>]+>/g, '').trim()
+
+    let language = 'de'
+    let translationGroup: string | null = null
     const categories: string[] = []
-    for (const cat of Array.from(item.getElementsByTagName('category'))) {
-      const domain = cat.getAttribute('domain') ?? ''
-      const text = cat.textContent?.trim() ?? ''
+
+    // Parse <category domain="..." nicename="..."><![CDATA[...]]></category>
+    const catRe = /<category[^>]*domain="([^"]*)"[^>]*nicename="([^"]*)"[^>]*>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))<\/category>/g
+    let catMatch: RegExpExecArray | null
+    while ((catMatch = catRe.exec(item)) !== null) {
+      const domain = catMatch[1]
+      const nicename = catMatch[2]
+      const text = (catMatch[3] ?? catMatch[4] ?? '').trim()
       if (domain === 'language') language = text === 'English' ? 'en' : 'de'
-      if (domain === 'post_translations') translationGroup = cat.getAttribute('nicename')
+      if (domain === 'post_translations') translationGroup = nicename || null
       if (domain === 'category') categories.push(text)
     }
-    const yoastTitle = getMeta(item, '_yoast_wpseo_title', WP_NS)
-    const yoastDesc = getMeta(item, '_yoast_wpseo_metadesc', WP_NS)
-    const yoastMeta = getMeta(item, '_yoast_wpseo_meta', WP_NS)
-    const coverImageUrl = getMeta(item, '_yoast_wpseo_opengraph-image', WP_NS)
+
+    const yoastTitle = getMetaRx(item, '_yoast_wpseo_title')
+    const yoastDesc = getMetaRx(item, '_yoast_wpseo_metadesc')
+    const yoastMeta = getMetaRx(item, '_yoast_wpseo_meta')
+    const coverImageUrl = getMetaRx(item, '_yoast_wpseo_opengraph-image')
+
     posts.push({
       id, title, slug, date, author, content,
-      excerpt: excerpt.slice(0, 200),
+      excerpt: rawExcerpt.slice(0, 200),
       language, translationGroup, categories,
       yoastTitle: yoastTitle && !yoastTitle.includes('%%') ? yoastTitle : null,
       yoastDesc: yoastDesc || null,
