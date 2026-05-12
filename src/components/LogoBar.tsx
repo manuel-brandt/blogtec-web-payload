@@ -18,7 +18,7 @@ export default function LogoBar({ locale = 'en' }: { locale?: 'en' | 'de' }) {
   const t = ui[locale]
 
   return (
-    <section className="bg-[#F5EFE8] border-t border-[#e8e0d8] py-10">
+    <section className="bg-white py-10">
       <div className="max-w-7xl mx-auto px-4">
         <p className="text-center text-gray-600 text-sm mb-8">
           {t.tagline} <strong>{t.highlight}</strong>
