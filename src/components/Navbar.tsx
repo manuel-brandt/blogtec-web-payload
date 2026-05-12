@@ -102,8 +102,6 @@ const servicesMenu = {
   ],
 }
 
-// ─── Nav links ───────────────────────────────────────────────────────────────
-
 const navLinks = [
   { label: 'Services', href: '/services', hasDropdown: true },
   { label: 'Link Center', href: '/link-center', hasDropdown: false },
@@ -122,7 +120,9 @@ export default function Navbar() {
   const pathname = usePathname()
   const isGerman = pathname.startsWith('/de')
   const menuData = isGerman ? servicesMenu.de : servicesMenu.en
-  const servicesRef = useRef<HTMLLIElement>(null)
+  // Delayed close so moving mouse from trigger → panel doesn't flicker
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const headerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
@@ -131,10 +131,10 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Close mega menu on outside click
+  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (servicesRef.current && !servicesRef.current.contains(e.target as Node)) {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
         setServicesOpen(false)
       }
     }
@@ -142,8 +142,17 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  const openServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setServicesOpen(true)
+  }
+  const scheduleClose = () => {
+    closeTimer.current = setTimeout(() => setServicesOpen(false), 120)
+  }
+
   return (
     <header
+      ref={headerRef}
       className={`sticky top-0 z-50 transition-colors duration-200 ${
         scrolled ? 'bg-white shadow-sm' : 'bg-[#F5EFE8]'
       }`}
@@ -175,11 +184,14 @@ export default function Navbar() {
           {navLinks.map((link) => {
             if (link.hasDropdown) {
               return (
-                <li key={link.label} ref={servicesRef} className="relative">
+                <li key={link.label}>
                   <button
-                    className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-black transition-colors"
-                    onMouseEnter={() => setServicesOpen(true)}
-                    onClick={() => setServicesOpen((v) => !v)}
+                    className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+                      servicesOpen ? 'text-[#E9204F]' : 'text-gray-700 hover:text-black'
+                    }`}
+                    onMouseEnter={openServices}
+                    onMouseLeave={scheduleClose}
+                    onClick={() => (servicesOpen ? setServicesOpen(false) : openServices())}
                     aria-expanded={servicesOpen}
                   >
                     {link.label}
@@ -188,57 +200,9 @@ export default function Navbar() {
                       className={`transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
-
-                  {/* Mega menu panel */}
-                  {servicesOpen && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[820px] bg-white rounded-2xl shadow-xl border border-gray-100 p-6 grid grid-cols-4 gap-4"
-                      onMouseLeave={() => setServicesOpen(false)}
-                    >
-                      {menuData.map((col) => {
-                        const Icon = col.icon
-                        return (
-                          <div key={col.title} className="flex flex-col gap-3">
-                            {/* Column header */}
-                            <div className="flex flex-col gap-1.5">
-                              <div className="w-10 h-10 rounded-xl bg-[#F5EFE8] flex items-center justify-center">
-                                <Icon size={20} className="text-[#E9204F]" />
-                              </div>
-                              <p className="font-bold text-gray-900 text-sm leading-tight">{col.title}</p>
-                              <p className="text-xs text-gray-500 leading-snug">{col.description}</p>
-                            </div>
-
-                            {/* Divider */}
-                            <div className="h-px bg-gray-100" />
-
-                            {/* Links */}
-                            <ul className="flex flex-col gap-1.5">
-                              {col.items.map((item) => (
-                                <li key={item.label}>
-                                  <Link
-                                    href={item.href}
-                                    className="flex items-center gap-1 text-sm text-gray-600 hover:text-[#E9204F] transition-colors"
-                                    onClick={() => setServicesOpen(false)}
-                                  >
-                                    {item.label}
-                                    {'popular' in item && item.popular && (
-                                      <span className="text-[10px] font-bold text-[#E9204F] uppercase tracking-wide ml-1">
-                                        Popular
-                                      </span>
-                                    )}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
                 </li>
               )
             }
-
             return (
               <li key={link.label}>
                 <Link
@@ -278,6 +242,70 @@ export default function Navbar() {
         </button>
       </nav>
 
+      {/* ── Mega menu panel — full-width, centered ── */}
+      <div
+        className={`absolute inset-x-0 top-full hidden lg:block transition-all duration-200 origin-top ${
+          servicesOpen
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}
+        onMouseEnter={openServices}
+        onMouseLeave={scheduleClose}
+      >
+        <div className="bg-[#FAF8F5] border-t border-gray-200 shadow-2xl">
+          <div className="max-w-7xl mx-auto px-8 py-10">
+            {/* Label */}
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">
+              {isGerman ? 'Leistungen' : 'Services'}
+            </p>
+
+            {/* Columns */}
+            <div className="grid grid-cols-4 gap-10">
+              {menuData.map((col) => {
+                const Icon = col.icon
+                return (
+                  <div key={col.title} className="flex flex-col gap-4">
+                    {/* Icon + header */}
+                    <div className="flex flex-col gap-3">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FFF0F3] flex items-center justify-center">
+                        <Icon size={26} className="text-[#E9204F]" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-base">{col.title}</p>
+                        <p className="text-sm text-gray-500 mt-1 leading-snug">{col.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-gray-200" />
+
+                    {/* Links */}
+                    <ul className="flex flex-col gap-2.5">
+                      {col.items.map((item) => (
+                        <li key={item.label}>
+                          <Link
+                            href={item.href}
+                            className="flex items-center gap-2 text-[15px] text-gray-600 hover:text-[#E9204F] transition-colors group"
+                            onClick={() => setServicesOpen(false)}
+                          >
+                            <span className="group-hover:underline">{item.label}</span>
+                            {'popular' in item && item.popular && (
+                              <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
+                                Popular
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-1">
@@ -297,26 +325,28 @@ export default function Navbar() {
                   </button>
 
                   {mobileServicesOpen && (
-                    <div className="pl-4 pb-2 space-y-4">
+                    <div className="pl-4 pb-2 space-y-5">
                       {menuData.map((col) => {
                         const Icon = col.icon
                         return (
                           <div key={col.title}>
                             <div className="flex items-center gap-2 mb-2">
-                              <Icon size={16} className="text-[#E9204F]" />
+                              <div className="w-7 h-7 rounded-lg bg-[#FFF0F3] flex items-center justify-center">
+                                <Icon size={14} className="text-[#E9204F]" />
+                              </div>
                               <p className="text-xs font-bold text-gray-800 uppercase tracking-wide">{col.title}</p>
                             </div>
-                            <ul className="space-y-1 pl-6">
+                            <ul className="space-y-2 pl-9">
                               {col.items.map((item) => (
                                 <li key={item.label}>
                                   <Link
                                     href={item.href}
-                                    className="flex items-center gap-1 text-sm text-gray-600 hover:text-[#E9204F] py-0.5 transition-colors"
+                                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#E9204F] transition-colors"
                                     onClick={() => { setMobileOpen(false); setMobileServicesOpen(false) }}
                                   >
                                     {item.label}
                                     {'popular' in item && item.popular && (
-                                      <span className="text-[10px] font-bold text-[#E9204F] uppercase tracking-wide ml-1">
+                                      <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
                                         Popular
                                       </span>
                                     )}
