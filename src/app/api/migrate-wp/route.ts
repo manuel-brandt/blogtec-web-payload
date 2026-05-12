@@ -386,22 +386,26 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  async function findBySlug(slug: string): Promise<string | null> {
+    const res = await payload.find({ collection: 'blog-posts', where: { slug: { equals: slug } }, limit: 1 })
+    return res.docs[0] ? String(res.docs[0].id) : null
+  }
+
   // Paired DE+EN posts
   for (const pair of pairs.filter(p => p.de && p.en)) {
     const { de, en } = pair as { de: WPPost; en: WPPost }
     const slug = en.slug || de.slug
     try {
-      const doc = await payload.create({
-        collection: 'blog-posts',
-        locale: 'de',
-        data: { ...await buildData(de), slug } as any,
-      })
-      await payload.update({
-        collection: 'blog-posts',
-        id: doc.id,
-        locale: 'en',
-        data: await buildData(en) as any,
-      })
+      const existingId = await findBySlug(slug)
+      const deData = await buildData(de)
+      const enData = await buildData(en)
+      if (existingId) {
+        await payload.update({ collection: 'blog-posts', id: existingId, locale: 'de', data: deData as any })
+        await payload.update({ collection: 'blog-posts', id: existingId, locale: 'en', data: enData as any })
+      } else {
+        const doc = await payload.create({ collection: 'blog-posts', locale: 'de', data: { ...deData, slug } as any })
+        await payload.update({ collection: 'blog-posts', id: doc.id, locale: 'en', data: enData as any })
+      }
       created++
     } catch (err: any) {
       failed++
@@ -416,11 +420,13 @@ export async function GET(req: NextRequest) {
   ]
   for (const post of singles) {
     try {
-      await payload.create({
-        collection: 'blog-posts',
-        locale: post.language as 'de' | 'en',
-        data: { ...await buildData(post), slug: post.slug } as any,
-      })
+      const existingId = await findBySlug(post.slug)
+      const data = await buildData(post)
+      if (existingId) {
+        await payload.update({ collection: 'blog-posts', id: existingId, locale: post.language as 'de' | 'en', data: data as any })
+      } else {
+        await payload.create({ collection: 'blog-posts', locale: post.language as 'de' | 'en', data: { ...data, slug: post.slug } as any })
+      }
       created++
     } catch (err: any) {
       failed++
