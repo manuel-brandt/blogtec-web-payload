@@ -127,6 +127,9 @@ export interface UserAuthOperations {
  */
 export interface BlogPost {
   id: number;
+  /**
+   * Exclude this language version from search engines and the sitemap.
+   */
   noIndex?: boolean | null;
   title: string;
   /**
@@ -137,7 +140,6 @@ export interface BlogPost {
   category?: ('SEO' | 'Content' | 'Link Building' | 'Google Ads' | 'Social Media' | 'Allgemein') | null;
   excerpt?: string | null;
   coverImage?: (number | null) | Media;
-  coverImageAlt?: string | null;
   author?: {
     name?: string | null;
     avatar?: (number | null) | Media;
@@ -166,39 +168,14 @@ export interface BlogPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: number;
-  noIndex?: boolean | null;
-  title: string;
-  slug: string;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
-  alt?: string | null;
+  /**
+   * Alt text for screen readers and SEO. Describe what is in the image.
+   */
+  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -236,6 +213,33 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Static pages — content is hardcoded in code. Edit SEO metadata in the SEO tab.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  /**
+   * Exclude this language version from search engines and the sitemap.
+   */
+  noIndex?: boolean | null;
+  /**
+   * Page name for identification, e.g. "Homepage" or "Blog".
+   */
+  title: string;
+  /**
+   * URL identifier, e.g. "home" or "blog". Use consistent values.
+   */
+  slug: string;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -292,6 +296,10 @@ export interface PayloadLockedDocument {
         value: number | BlogPost;
       } | null)
     | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -346,13 +354,13 @@ export interface PayloadMigration {
  * via the `definition` "blog-posts_select".
  */
 export interface BlogPostsSelect<T extends boolean = true> {
+  noIndex?: T;
   title?: T;
   slug?: T;
   publishedAt?: T;
   category?: T;
   excerpt?: T;
   coverImage?: T;
-  coverImageAlt?: T;
   author?:
     | T
     | {
@@ -360,6 +368,23 @@ export interface BlogPostsSelect<T extends boolean = true> {
         avatar?: T;
       };
   body?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  noIndex?: T;
+  title?: T;
+  slug?: T;
   meta?:
     | T
     | {
