@@ -242,7 +242,7 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* ── Mega menu panel — full-width, centered ── */}
+      {/* ── Mega menu panel — constrained to content width ── */}
       <div
         className={`absolute inset-x-0 top-full hidden lg:block transition-all duration-200 origin-top ${
           servicesOpen
@@ -252,8 +252,8 @@ export default function Navbar() {
         onMouseEnter={openServices}
         onMouseLeave={scheduleClose}
       >
-        <div className="bg-[#FAF8F5] border-t border-gray-200 shadow-2xl">
-          <div className="max-w-7xl mx-auto px-8 py-10">
+        <div className="max-w-7xl mx-auto px-4 pb-3">
+          <div className="bg-[#FAF8F5] rounded-2xl border border-gray-200 shadow-2xl px-8 py-10">
             {/* Label */}
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">
               {isGerman ? 'Leistungen' : 'Services'}
