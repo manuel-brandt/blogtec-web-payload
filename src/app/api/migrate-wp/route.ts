@@ -11,6 +11,7 @@ import path from 'node:path'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { Window } from 'happy-dom'
+import { put } from '@vercel/blob'
 
 const SECRET = 'migrate-blogtec-2026'
 
@@ -297,7 +298,9 @@ function parseXML(xmlPath: string): WPPost[] {
 
 // ─── Image downloader ────────────────────────────────────────────────────────
 
-// Downloads a URL and creates a Payload media record. Returns the numeric media ID or null.
+// Downloads a URL, uploads to Vercel Blob directly, creates a Payload media record.
+// The vercelBlobStorage plugin does not fire for local-API payload.create calls,
+// so we use @vercel/blob's put() ourselves and store the blob URL explicitly.
 async function fetchMedia(
   url: string,
   payload: Awaited<ReturnType<typeof getPayload>>,
@@ -315,10 +318,18 @@ async function fetchMedia(
     const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
     const alt = filename.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '')
+
+    // Upload directly to Vercel Blob to get a public URL
+    const blob = await put(`media/${filename}`, buffer, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      addRandomSuffix: true,
+    })
+
+    // Create the Payload media record with the blob URL set explicitly
     const doc = await payload.create({
       collection: 'media',
-      data: { alt },
-      file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
+      data: { alt, url: blob.url, filename, mimeType, filesize: buffer.length } as any,
     })
     const id = Number(doc.id)
     cache.set(url, id)
