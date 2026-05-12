@@ -11,7 +11,6 @@ import path from 'node:path'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { Window } from 'happy-dom'
-import { put } from '@vercel/blob'
 
 const SECRET = 'migrate-blogtec-2026'
 
@@ -298,9 +297,6 @@ function parseXML(xmlPath: string): WPPost[] {
 
 // ─── Image downloader ────────────────────────────────────────────────────────
 
-// Downloads a URL, uploads to Vercel Blob directly, creates a Payload media record.
-// The vercelBlobStorage plugin does not fire for local-API payload.create calls,
-// so we use @vercel/blob's put() ourselves and store the blob URL explicitly.
 async function fetchMedia(
   url: string,
   payload: Awaited<ReturnType<typeof getPayload>>,
@@ -309,33 +305,34 @@ async function fetchMedia(
 ): Promise<number | null> {
   if (cache.has(url)) return cache.get(url)!
   try {
+    const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
+
+    // Re-use an existing media record with the same filename (across batches)
+    const existing = await payload.find({
+      collection: 'media',
+      where: { filename: { equals: filename } },
+      limit: 1,
+    })
+    if (existing.docs[0]) {
+      const id = Number(existing.docs[0].id)
+      cache.set(url, id)
+      return id
+    }
+
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
     if (!res.ok) {
       errors.push(`IMG ${res.status}: ${url}`)
       return null
     }
     const buffer = Buffer.from(await res.arrayBuffer())
-    const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
     const alt = filename.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '')
 
-    // Upload to Vercel Blob to get the public URL
-    const blob = await put(`media/${filename}`, buffer, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      addRandomSuffix: true,
-    })
-
-    // Create the Payload media record (url will default to local /api/media/file/...)
     const doc = await payload.create({
       collection: 'media',
       data: { alt } as any,
       file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
     })
-
-    // payload.update doesn't persist url for upload collections — patch via raw SQL
-    const pool = (payload.db as any).pool
-    await pool.query('UPDATE media SET url = $1 WHERE id = $2', [blob.url, doc.id])
 
     const id = Number(doc.id)
     cache.set(url, id)
@@ -344,6 +341,24 @@ async function fetchMedia(
     errors.push(`IMG ERR ${url}: ${err?.message}`)
     return null
   }
+}
+
+// Run up to `concurrency` promises at a time
+async function pMap<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  concurrency = 4,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length)
+  let idx = 0
+  async function worker() {
+    while (idx < items.length) {
+      const i = idx++
+      results[i] = await fn(items[i])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker))
+  return results
 }
 
 // ─── Route handler ───────────────────────────────────────────────────────────
@@ -356,7 +371,7 @@ export async function GET(req: NextRequest) {
   }
 
   const offset = parseInt(req.nextUrl.searchParams.get('offset') ?? '0', 10)
-  const limit = parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10)
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') ?? '5', 10)
 
   const xmlPath = path.join(process.cwd(), 'scripts', 'wp-export.xml')
   const payload = await getPayload({ config: await configPromise })
@@ -409,14 +424,12 @@ export async function GET(req: NextRequest) {
     const coverImageId = post.coverImageUrl
       ? await fetchMedia(post.coverImageUrl, payload, mediaCache, mediaErrors)
       : null
-    // Build image map for in-content images from this post's content
+    // Build image map for in-content images from this post's content (parallel, 4 at a time)
     const contentImageMap: Record<string, number> = {}
     const imgSrcs = [...post.content.matchAll(/src="(https?:\/\/blogtec\.io\/wp-content\/uploads\/[^"]+)"/g)]
       .map(m => m[1])
-    for (const src of imgSrcs) {
-      const id = await fetchMedia(src, payload, mediaCache, mediaErrors)
-      if (id) contentImageMap[src] = id
-    }
+    const imgIds = await pMap(imgSrcs, src => fetchMedia(src, payload, mediaCache, mediaErrors))
+    imgSrcs.forEach((src, i) => { if (imgIds[i]) contentImageMap[src] = imgIds[i]! })
     return {
       title: post.title,
       excerpt: post.excerpt || undefined,
