@@ -300,11 +300,15 @@ async function fetchMedia(
   url: string,
   payload: Awaited<ReturnType<typeof getPayload>>,
   cache: Map<string, string>,
+  errors: string[],
 ): Promise<string | null> {
   if (cache.has(url)) return cache.get(url)!
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      errors.push(`IMG ${res.status}: ${url}`)
+      return null
+    }
     const buffer = Buffer.from(await res.arrayBuffer())
     const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
@@ -316,7 +320,8 @@ async function fetchMedia(
     })
     cache.set(url, String(doc.id))
     return String(doc.id)
-  } catch {
+  } catch (err: any) {
+    errors.push(`IMG ERR ${url}: ${err?.message}`)
     return null
   }
 }
@@ -336,6 +341,7 @@ export async function GET(req: NextRequest) {
   const xmlPath = path.join(process.cwd(), 'scripts', 'wp-export.xml')
   const payload = await getPayload({ config: await configPromise })
   const mediaCache = new Map<string, string>() // url → payloadMediaId
+  const mediaErrors: string[] = []
 
   let allPosts: WPPost[]
   try {
@@ -381,14 +387,14 @@ export async function GET(req: NextRequest) {
 
   async function buildData(post: WPPost) {
     const coverImageId = post.coverImageUrl
-      ? await fetchMedia(post.coverImageUrl, payload, mediaCache)
+      ? await fetchMedia(post.coverImageUrl, payload, mediaCache, mediaErrors)
       : null
     // Build image map for in-content images from this post's content
     const contentImageMap: Record<string, string> = {}
     const imgSrcs = [...post.content.matchAll(/src="(https?:\/\/blogtec\.io\/wp-content\/uploads\/[^"]+)"/g)]
       .map(m => m[1])
     for (const src of imgSrcs) {
-      const id = await fetchMedia(src, payload, mediaCache)
+      const id = await fetchMedia(src, payload, mediaCache, mediaErrors)
       if (id) contentImageMap[src] = id
     }
     return {
@@ -463,6 +469,9 @@ export async function GET(req: NextRequest) {
     next: nextOffset < totalWork
       ? `/api/migrate-wp?secret=${SECRET}&offset=${nextOffset}&limit=${limit}`
       : null,
+    blobTokenPresent: !!process.env.BLOB_READ_WRITE_TOKEN,
+    mediaUploaded: mediaCache.size,
+    mediaErrors: mediaErrors.slice(0, 10),
     errors: results,
   })
 }
