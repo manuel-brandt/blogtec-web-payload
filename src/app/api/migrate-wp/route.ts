@@ -11,6 +11,7 @@ import path from 'node:path'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { Window } from 'happy-dom'
+import { put } from '@vercel/blob'
 
 const SECRET = 'migrate-blogtec-2026'
 
@@ -320,37 +321,55 @@ async function fetchMedia(
   if (cache.has(url)) return cache.get(url)!
   try {
     const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
+    const pool = (payload.db as any).pool
 
-    // Re-use an existing media record with the same filename (across batches)
+    // Re-use existing record only if it already has a real blob URL
     const existing = await payload.find({
       collection: 'media',
       where: { filename: { equals: filename } },
       limit: 1,
     })
     if (existing.docs[0]) {
-      const id = Number(existing.docs[0].id)
-      cache.set(url, id)
-      return id
+      const doc = existing.docs[0] as any
+      if (typeof doc.url === 'string' && doc.url.startsWith('https://')) {
+        const id = Number(doc.id)
+        cache.set(url, id)
+        return id
+      }
     }
 
+    // Download the image
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
-    if (!res.ok) {
-      errors.push(`IMG ${res.status}: ${url}`)
-      return null
-    }
+    if (!res.ok) { errors.push(`IMG ${res.status}: ${url}`); return null }
     const buffer = Buffer.from(await res.arrayBuffer())
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
     const alt = filename.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '')
 
-    const doc = await payload.create({
-      collection: 'media',
-      data: { alt } as any,
-      file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
+    // Upload to Vercel Blob (vercelBlobStorage plugin doesn't intercept local payload.create)
+    const blob = await put(`media/${filename}`, buffer, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      addRandomSuffix: false,
     })
 
-    const id = Number(doc.id)
-    cache.set(url, id)
-    return id
+    let docId: number
+    if (existing.docs[0]) {
+      // Existing record has broken local URL — just patch it
+      docId = Number(existing.docs[0].id)
+    } else {
+      const doc = await payload.create({
+        collection: 'media',
+        data: { alt } as any,
+        file: { data: buffer, name: filename, mimetype: mimeType, size: buffer.length },
+      })
+      docId = Number(doc.id)
+    }
+
+    // Patch URL to real blob URL — payload.update doesn't persist url for upload collections
+    await pool.query('UPDATE media SET url = $1 WHERE id = $2', [blob.url, docId])
+
+    cache.set(url, docId)
+    return docId
   } catch (err: any) {
     errors.push(`IMG ERR ${url}: ${err?.message}`)
     return null
