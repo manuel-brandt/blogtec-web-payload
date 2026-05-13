@@ -1,7 +1,30 @@
 import type { CollectionConfig } from 'payload'
 
+function blobBaseUrl(): string {
+  const token = process.env.BLOB_READ_WRITE_TOKEN ?? ''
+  const storeId = token.match(/vercel_blob_rw_([^_]+)_/)?.[1]
+  return storeId ? `https://${storeId}.public.blob.vercel-storage.com` : ''
+}
+
+const BLOB_BASE = blobBaseUrl()
+
 export const Media: CollectionConfig = {
   slug: 'media',
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        if (
+          BLOB_BASE &&
+          doc.filename &&
+          typeof doc.url === 'string' &&
+          doc.url.startsWith('/api/media/file/')
+        ) {
+          doc.url = `${BLOB_BASE}/media/${doc.filename}`
+        }
+        return doc
+      },
+    ],
+  },
   upload: {
     staticDir: 'public/media',
     mimeTypes: ['image/*'],
