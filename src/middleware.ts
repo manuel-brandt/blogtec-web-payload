@@ -1,8 +1,28 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+function getBlobBase(): string {
+  if (process.env.STORAGE_VERCEL_BLOB_BASE_URL) return process.env.STORAGE_VERCEL_BLOB_BASE_URL
+  const token = process.env.BLOB_READ_WRITE_TOKEN ?? ''
+  const storeId = token.split('_')[3]?.toLowerCase()
+  return storeId ? `https://${storeId}.public.blob.vercel-storage.com` : ''
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // Intercept media file requests before they reach Payload
+  // to avoid the plugin's head() API call that drains free-tier operations
+  if (pathname.startsWith('/api/media/file/')) {
+    const filename = pathname.split('/').pop()
+    if (filename) {
+      const base = getBlobBase()
+      if (base) {
+        const cdnUrl = `${base}/media/${filename}`
+        return NextResponse.redirect(cdnUrl, 302)
+      }
+    }
+  }
 
   // Skip Next.js internals, Payload admin, API, static assets
   if (
