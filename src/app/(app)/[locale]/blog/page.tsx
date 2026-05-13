@@ -7,6 +7,17 @@ import type { Media } from '@/payload-types'
 import type { Metadata } from 'next'
 import { getAlternates } from '@/lib/alternates'
 
+function blobCoverUrl(cover: Media | null): string | null {
+  if (!cover) return null
+  const filename = cover.filename
+  if (!filename) return cover.url ?? null
+  const token = process.env.BLOB_READ_WRITE_TOKEN ?? ''
+  const storeId = token.split('_')[3]?.toLowerCase()
+  return storeId
+    ? `https://${storeId}.public.blob.vercel-storage.com/media/${filename}`
+    : (cover.url ?? null)
+}
+
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
@@ -137,6 +148,7 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                   post.coverImage && typeof post.coverImage === 'object'
                     ? (post.coverImage as Media)
                     : null
+                const coverImgUrl = blobCoverUrl(cover)
                 return (
                   <Link
                     key={post.slug}
@@ -145,11 +157,11 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                   >
                     {/* Cover image */}
                     <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
-                      {cover?.url ? (
+                      {coverImgUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={cover.url}
-                          alt={cover.alt ?? post.title ?? ''}
+                          src={coverImgUrl}
+                          alt={cover?.alt ?? post.title ?? ''}
                           width={640}
                           height={360}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

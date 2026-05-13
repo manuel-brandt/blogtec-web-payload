@@ -10,6 +10,17 @@ import type { Media } from '@/payload-types'
 import type { Metadata } from 'next'
 import { getAlternates } from '@/lib/alternates'
 
+function blobCoverUrl(cover: Media | null): string | null {
+  if (!cover) return null
+  const filename = cover.filename
+  if (!filename) return cover.url ?? null
+  const token = process.env.BLOB_READ_WRITE_TOKEN ?? ''
+  const storeId = token.split('_')[3]?.toLowerCase()
+  return storeId
+    ? `https://${storeId}.public.blob.vercel-storage.com/media/${filename}`
+    : (cover.url ?? null)
+}
+
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
@@ -125,6 +136,7 @@ export default async function BlogPostPage({
 
   const cover =
     post.coverImage && typeof post.coverImage === 'object' ? (post.coverImage as Media) : null
+  const coverImgUrl = blobCoverUrl(cover)
   const authorAvatar =
     post.author?.avatar && typeof post.author.avatar === 'object'
       ? (post.author.avatar as Media)
@@ -183,12 +195,12 @@ export default async function BlogPostPage({
         </section>
 
         {/* Cover image */}
-        {cover?.url && (
+        {coverImgUrl && (
           <div className="max-w-4xl mx-auto px-4 pt-10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={cover.url}
-              alt={cover.alt ?? post.title ?? ''}
+              src={coverImgUrl}
+              alt={cover?.alt ?? post.title ?? ''}
               width={1200}
               height={630}
               className="w-full rounded-2xl object-cover shadow-sm"
