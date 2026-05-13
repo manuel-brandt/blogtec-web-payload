@@ -17,7 +17,7 @@ function blobCoverUrl(cover: Media | null): string | null {
   const token = process.env.BLOB_READ_WRITE_TOKEN ?? ''
   const storeId = token.split('_')[3]?.toLowerCase()
   return storeId
-    ? `https://${storeId}.public.blob.vercel-storage.com/media/${filename}`
+    ? `https://${storeId}.public.blob.vercel-storage.com/${filename}`
     : (cover.url ?? null)
 }
 

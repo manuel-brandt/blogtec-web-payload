@@ -14,7 +14,7 @@ export const Media: CollectionConfig = {
       ({ doc }) => {
         if (doc.filename && typeof doc.url === 'string' && doc.url.startsWith('/api/media/file/')) {
           const base = getBlobBase()
-          if (base) doc.url = `${base}/media/${doc.filename}`
+          if (base) doc.url = `${base}/${doc.filename}`
         }
         return doc
       },

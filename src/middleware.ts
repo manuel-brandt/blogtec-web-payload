@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
     if (filename) {
       const base = getBlobBase()
       if (base) {
-        const cdnUrl = `${base}/media/${filename}`
+        const cdnUrl = `${base}/${filename}`
         return NextResponse.redirect(cdnUrl, 302)
       }
     }
