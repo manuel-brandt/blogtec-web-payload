@@ -244,9 +244,18 @@ function splitItems(xml: string): string[] {
   return items
 }
 
-function parseXML(xmlPath: string): WPPost[] {
+function parseXML(xmlPath: string): { posts: WPPost[]; attachmentMap: Map<string, string> } {
   const xml = readFileSync(xmlPath, 'utf-8')
   const posts: WPPost[] = []
+
+  // Build attachment ID → URL map first
+  const attachmentMap = new Map<string, string>()
+  for (const item of splitItems(xml)) {
+    if (rx(item, 'wp:post_type') !== 'attachment') continue
+    const id = rx(item, 'wp:post_id')
+    const url = rx(item, 'wp:attachment_url')
+    if (id && url) attachmentMap.set(id, url)
+  }
 
   for (const item of splitItems(xml)) {
     const postType = rx(item, 'wp:post_type')
@@ -280,7 +289,12 @@ function parseXML(xmlPath: string): WPPost[] {
     const yoastTitle = getMetaRx(item, '_yoast_wpseo_title')
     const yoastDesc = getMetaRx(item, '_yoast_wpseo_metadesc')
     const yoastMeta = getMetaRx(item, '_yoast_wpseo_meta')
-    const coverImageUrl = getMetaRx(item, '_yoast_wpseo_opengraph-image')
+
+    // Featured image: use _thumbnail_id → look up in attachment map
+    const thumbnailId = getMetaRx(item, '_thumbnail_id')
+    const coverImageUrl = thumbnailId
+      ? (attachmentMap.get(thumbnailId) ?? null)
+      : null
 
     posts.push({
       id, title, slug, date, author, content,
@@ -289,10 +303,10 @@ function parseXML(xmlPath: string): WPPost[] {
       yoastTitle: yoastTitle && !yoastTitle.includes('%%') ? yoastTitle : null,
       yoastDesc: yoastDesc || null,
       yoastNoIndex: parseYoastNoIndex(yoastMeta),
-      coverImageUrl: coverImageUrl || null,
+      coverImageUrl,
     })
   }
-  return posts
+  return { posts, attachmentMap }
 }
 
 // ─── Image downloader ────────────────────────────────────────────────────────
@@ -380,7 +394,8 @@ export async function GET(req: NextRequest) {
 
   let allPosts: WPPost[]
   try {
-    allPosts = parseXML(xmlPath)
+    const parsed = parseXML(xmlPath)
+    allPosts = parsed.posts
   } catch (err: any) {
     return NextResponse.json({ error: 'Failed to parse XML', detail: err?.message }, { status: 500 })
   }
