@@ -321,9 +321,8 @@ async function fetchMedia(
   if (cache.has(url)) return cache.get(url)!
   try {
     const filename = url.split('/').pop()?.split('?')[0] ?? 'image.jpg'
-    const pool = (payload.db as any).pool
 
-    // Re-use existing record only if it already has a real blob URL
+    // Reuse existing record only if the blob is already at root level (no /media/ subdir)
     const existing = await payload.find({
       collection: 'media',
       where: { filename: { equals: filename } },
@@ -331,7 +330,8 @@ async function fetchMedia(
     })
     if (existing.docs[0]) {
       const doc = existing.docs[0] as any
-      if (typeof doc.url === 'string' && doc.url.startsWith('https://')) {
+      const storedUrl: string = doc.url ?? ''
+      if (storedUrl.startsWith('https://') && !storedUrl.includes('/media/')) {
         const id = Number(doc.id)
         cache.set(url, id)
         return id
@@ -345,17 +345,15 @@ async function fetchMedia(
     const mimeType = (res.headers.get('content-type') ?? 'image/jpeg').split(';')[0]
     const alt = filename.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '')
 
-    // Upload to Vercel Blob (vercelBlobStorage plugin doesn't intercept local payload.create)
-    const blob = await put(`media/${filename}`, buffer, {
+    // Upload to blob ROOT level (no prefix) — staticHandler constructs {baseUrl}/{filename}
+    await put(filename, buffer, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN,
-      addRandomSuffix: false,
       allowOverwrite: true,
     })
 
     let docId: number
     if (existing.docs[0]) {
-      // Existing record has broken local URL — just patch it
       docId = Number(existing.docs[0].id)
     } else {
       const doc = await payload.create({
@@ -365,9 +363,6 @@ async function fetchMedia(
       })
       docId = Number(doc.id)
     }
-
-    // Patch URL to real blob URL — payload.update doesn't persist url for upload collections
-    await pool.query('UPDATE media SET url = $1 WHERE id = $2', [blob.url, docId])
 
     cache.set(url, docId)
     return docId
