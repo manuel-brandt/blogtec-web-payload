@@ -275,7 +275,7 @@ export default function Navbar() {
               return (
                 <li key={link.label}>
                   <button
-                    className={`flex items-center gap-1 text-sm font-semibold transition-colors ${
+                    className={`flex items-center gap-1 text-[18px] font-semibold transition-colors ${
                       servicesOpen ? 'text-[#E9204F]' : 'text-gray-700 hover:text-black'
                     }`}
                     onMouseEnter={openServices}
@@ -296,7 +296,7 @@ export default function Navbar() {
               return (
                 <li key={link.label}>
                   <button
-                    className={`flex items-center gap-1 text-sm font-semibold transition-colors ${
+                    className={`flex items-center gap-1 text-[18px] font-semibold transition-colors ${
                       resourcesOpen ? 'text-[#E9204F]' : 'text-gray-700 hover:text-black'
                     }`}
                     onMouseEnter={openResources}
@@ -317,7 +317,7 @@ export default function Navbar() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="flex items-center gap-1 text-sm font-semibold text-gray-700 hover:text-black transition-colors"
+                  className="flex items-center gap-1 text-[18px] font-semibold text-gray-700 hover:text-black transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -387,7 +387,7 @@ export default function Navbar() {
                         <li key={item.label}>
                           <Link
                             href={item.href}
-                            className="flex flex-col gap-0.5 text-[18px] text-gray-600 hover:text-[#E9204F] transition-colors group"
+                            className="flex flex-col gap-0.5 text-[15px] text-gray-600 hover:text-[#E9204F] transition-colors group"
                             onClick={() => setServicesOpen(false)}
                           >
                             <span className="flex items-center gap-2">
@@ -514,7 +514,7 @@ export default function Navbar() {
               return (
                 <div key={link.label}>
                   <button
-                    className="flex items-center justify-between w-full text-sm font-semibold text-gray-700 hover:text-black py-2"
+                    className="flex items-center justify-between w-full text-[18px] font-semibold text-gray-700 hover:text-black py-2"
                     onClick={() => setMobileServicesOpen((v) => !v)}
                   >
                     {link.label}
@@ -580,7 +580,7 @@ export default function Navbar() {
               return (
                 <div key={link.label}>
                   <button
-                    className="flex items-center justify-between w-full text-sm font-semibold text-gray-700 hover:text-black py-2"
+                    className="flex items-center justify-between w-full text-[18px] font-semibold text-gray-700 hover:text-black py-2"
                     onClick={() => setMobileResourcesOpen((v) => !v)}
                   >
                     {link.label}
@@ -620,7 +620,7 @@ export default function Navbar() {
                       {/* Featured guide link in mobile */}
                       <Link
                         href={resourcesData.featured.href}
-                        className="flex items-center gap-2 text-sm font-semibold text-[#E9204F] pl-0"
+                        className="flex items-center gap-2 text-[18px] font-semibold text-[#E9204F] pl-0"
                         onClick={() => { setMobileOpen(false); setMobileResourcesOpen(false) }}
                       >
                         ↓ {resourcesData.featured.cta}
@@ -635,7 +635,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="block text-sm font-semibold text-gray-700 hover:text-black py-2"
+                className="block text-[18px] font-semibold text-gray-700 hover:text-black py-2"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
