@@ -387,7 +387,7 @@ export default function Navbar() {
                         <li key={item.label}>
                           <Link
                             href={item.href}
-                            className="flex flex-col gap-0.5 text-[15px] text-gray-600 hover:text-[#E9204F] transition-colors group"
+                            className="flex flex-col gap-0.5 text-[18px] text-gray-600 hover:text-[#E9204F] transition-colors group"
                             onClick={() => setServicesOpen(false)}
                           >
                             <span className="flex items-center gap-2">
