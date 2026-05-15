@@ -17,9 +17,25 @@ const servicesMenu = {
       description: 'Give us a budget and we make most out of it.',
       items: [
         { label: 'Managed SEO', href: '/services/managed-seo' },
-        { label: 'Managed Google Ads', href: '/services/managed-google-ads' },
-        { label: 'Managed SEO Content', href: '/services/managed-seo-content' },
         { label: 'Managed Backlinks', href: '/services/managed-backlinks' },
+        { label: 'Managed SEO Content', href: '/services/managed-seo-content' },
+        { label: 'Managed Google Ads', href: '/services/managed-google-ads' },
+      ],
+    },
+    {
+      icon: Link2,
+      title: 'Backlinks & PR',
+      description: 'Various backlink options to build authority.',
+      items: [
+        {
+          label: 'Link Center',
+          href: '/link-center',
+          popular: true,
+          subtext: 'Guest Posts · Link Insertion · Advertorials',
+        },
+        { label: 'Business Directories', href: '/services/directories' },
+        { label: 'Press Release', href: '/services/press-release' },
+        { label: 'Community Links', href: '/services/community-links' },
       ],
     },
     {
@@ -30,17 +46,6 @@ const servicesMenu = {
         { label: 'SEO Content', href: '/services/seo-content', popular: true },
         { label: 'Content Optimization', href: '/services/content-optimization' },
         { label: 'Web Design', href: '/services/website-design' },
-      ],
-    },
-    {
-      icon: Link2,
-      title: 'Backlinks & PR',
-      description: 'Various backlink options to build authority.',
-      items: [
-        { label: 'Link Center', href: '/link-center', popular: true },
-        { label: 'Business Directories', href: '/services/directories' },
-        { label: 'Press Release', href: '/services/press-release' },
-        { label: 'Community Links', href: '/services/community-links' },
       ],
     },
     {
@@ -62,9 +67,25 @@ const servicesMenu = {
       description: 'Wir übernehmen dein Budget und holen das Maximum heraus.',
       items: [
         { label: 'Managed SEO', href: '/de/services/managed-seo' },
-        { label: 'Managed Google Ads', href: '/de/services/managed-google-ads' },
-        { label: 'Managed SEO Content', href: '/de/services/managed-seo-content' },
         { label: 'Managed Backlinks', href: '/de/services/managed-backlinks' },
+        { label: 'Managed SEO Content', href: '/de/services/managed-seo-content' },
+        { label: 'Managed Google Ads', href: '/de/services/managed-google-ads' },
+      ],
+    },
+    {
+      icon: Link2,
+      title: 'Backlinks & PR',
+      description: 'Verschiedene Backlink-Optionen zur Stärkung deiner Autorität.',
+      items: [
+        {
+          label: 'Link Center',
+          href: '/de/link-center',
+          popular: true,
+          subtext: 'Guest Posts · Link Insertion · Advertorials',
+        },
+        { label: 'Branchenverzeichnisse', href: '/de/services/directories' },
+        { label: 'Pressemitteilung', href: '/de/services/press-release' },
+        { label: 'Community Links', href: '/de/services/community-links' },
       ],
     },
     {
@@ -75,17 +96,6 @@ const servicesMenu = {
         { label: 'SEO Content', href: '/de/services/seo-content', popular: true },
         { label: 'Content-Optimierung', href: '/de/services/content-optimization' },
         { label: 'Website Design', href: '/de/services/website-design' },
-      ],
-    },
-    {
-      icon: Link2,
-      title: 'Backlinks & PR',
-      description: 'Verschiedene Backlink-Optionen zur Stärkung deiner Autorität.',
-      items: [
-        { label: 'Link Center', href: '/de/link-center', popular: true },
-        { label: 'Branchenverzeichnisse', href: '/de/services/directories' },
-        { label: 'Pressemitteilung', href: '/de/services/press-release' },
-        { label: 'Community Links', href: '/de/services/community-links' },
       ],
     },
     {
@@ -377,13 +387,27 @@ export default function Navbar() {
                         <li key={item.label}>
                           <Link
                             href={item.href}
-                            className="flex items-center gap-2 text-[15px] text-gray-600 hover:text-[#E9204F] transition-colors group"
+                            className="flex flex-col gap-0.5 text-[15px] text-gray-600 hover:text-[#E9204F] transition-colors group"
                             onClick={() => setServicesOpen(false)}
                           >
-                            <span className="group-hover:underline">{item.label}</span>
-                            {'popular' in item && item.popular && (
-                              <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
-                                Popular
+                            <span className="flex items-center gap-2">
+                              <span className="group-hover:underline">{item.label}</span>
+                              {'popular' in item && item.popular && (
+                                <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
+                                  Popular
+                                </span>
+                              )}
+                            </span>
+                            {'subtext' in item && item.subtext && (
+                              <span className="text-[11px] text-gray-400 leading-tight">
+                                {(item.subtext as string).split('·').map((part, i, arr) => (
+                                  <span key={i}>
+                                    {part.trim()}
+                                    {i < arr.length - 1 && (
+                                      <span className="text-[#E9204F] mx-1">·</span>
+                                    )}
+                                  </span>
+                                ))}
                               </span>
                             )}
                           </Link>
@@ -516,13 +540,27 @@ export default function Navbar() {
                                 <li key={item.label}>
                                   <Link
                                     href={item.href}
-                                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#E9204F] transition-colors"
+                                    className="flex flex-col gap-0.5 text-sm text-gray-600 hover:text-[#E9204F] transition-colors"
                                     onClick={() => { setMobileOpen(false); setMobileServicesOpen(false) }}
                                   >
-                                    {item.label}
-                                    {'popular' in item && item.popular && (
-                                      <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
-                                        Popular
+                                    <span className="flex items-center gap-2">
+                                      {item.label}
+                                      {'popular' in item && item.popular && (
+                                        <span className="text-[10px] font-bold text-white bg-[#E9204F] px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">
+                                          Popular
+                                        </span>
+                                      )}
+                                    </span>
+                                    {'subtext' in item && item.subtext && (
+                                      <span className="text-[11px] text-gray-400 leading-tight">
+                                        {(item.subtext as string).split('·').map((part, i, arr) => (
+                                          <span key={i}>
+                                            {part.trim()}
+                                            {i < arr.length - 1 && (
+                                              <span className="text-[#E9204F] mx-1">·</span>
+                                            )}
+                                          </span>
+                                        ))}
                                       </span>
                                     )}
                                   </Link>
