@@ -399,7 +399,7 @@ export default function Navbar() {
                               )}
                             </span>
                             {'subtext' in item && item.subtext && (
-                              <span className="text-[11px] text-gray-400 leading-tight">
+                              <span className="text-[13px] text-gray-400 leading-tight">
                                 {(item.subtext as string).split('·').map((part, i, arr) => (
                                   <span key={i}>
                                     {part.trim()}
@@ -552,7 +552,7 @@ export default function Navbar() {
                                       )}
                                     </span>
                                     {'subtext' in item && item.subtext && (
-                                      <span className="text-[11px] text-gray-400 leading-tight">
+                                      <span className="text-[13px] text-gray-400 leading-tight">
                                         {(item.subtext as string).split('·').map((part, i, arr) => (
                                           <span key={i}>
                                             {part.trim()}
