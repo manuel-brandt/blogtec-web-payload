@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { BlogtecLogo } from './BlogtecLogo'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { NavServicesMega } from './NavServicesMega'
 
 const navLinks = [
   { label: 'Services', href: '/services', hasDropdown: true },
@@ -18,8 +19,19 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [servicesOpen, setServicesOpen] = useState(false)
+  const servicesRef = useRef<HTMLLIElement>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pathname = usePathname()
   const isGerman = pathname.startsWith('/de')
+
+  const openServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setServicesOpen(true)
+  }
+  const closeServices = () => {
+    closeTimer.current = setTimeout(() => setServicesOpen(false), 120)
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
@@ -60,14 +72,28 @@ export default function Navbar() {
         {/* Desktop nav links */}
         <ul className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => (
-            <li key={link.label}>
+            <li
+              key={link.label}
+              ref={link.label === 'Services' ? servicesRef : undefined}
+              className="relative"
+              onMouseEnter={link.label === 'Services' ? openServices : undefined}
+              onMouseLeave={link.label === 'Services' ? closeServices : undefined}
+            >
               <Link
                 href={link.href}
                 className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-black transition-colors"
               >
                 {link.label}
-                {link.hasDropdown && <ChevronDown size={14} />}
+                {link.hasDropdown && (
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-150 ${link.label === 'Services' && servicesOpen ? 'rotate-180' : ''}`}
+                  />
+                )}
               </Link>
+              {link.label === 'Services' && servicesOpen && (
+                <NavServicesMega isGerman={isGerman} />
+              )}
             </li>
           ))}
         </ul>
